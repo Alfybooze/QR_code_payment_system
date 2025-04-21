@@ -1,0 +1,760 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+:root {
+  --bg-dark: #121418;
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --card-bg: #1a1e24;
+  --sidebar-bg: #1a1e24;
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
+  --accent: #6d5acd;
+  --accent-blue: #3a80e9;
+  --accent-green: #00ca72;
+  --accent-red: #fe5e76;
+  --accent-purple: #bc1fe0;
+  --border-color: #2a2e35;
+  --success: #4caf50;
+  --border-radius: 12px;
+  --input-bg: #2c2c2c;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* Container layout */
+.container {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  max-width: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  width: 240px;
+  background-color: var(--sidebar-bg);
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  transition: transform 0.3s ease-in-out;
+  z-index: 1000;
+}
+
+.sidebar-header {
+  padding: 1rem;
+  position: sticky;
+  top: 0;
+  background-color: var(--sidebar-bg);
+  z-index: 2;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close-sidebar {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 1.25rem;
+}
+
+.sidebar-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  margin-right: 1rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  background-color: var(--accent-blue);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+}
+
+.menu-section {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 80px;
+}
+
+.menu-title {
+  padding: 8px 24px;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.menu-item {
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.menu-item.active {
+  background-color: var(--accent-blue);
+  color: white;
+}
+
+.menu-item i {
+  margin-right: 12px;
+  font-size: 18px;
+}
+
+.menu-item span {
+  font-size: 14px;
+}
+
+.menu-item a {
+  text-decoration: none;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.menu-item.active a {
+  color: var(--text-primary);
+}
+
+.menu-item:hover a {
+  color: var(--text-primary);
+  background-color: transparent;
+}
+
+.logout {
+  position: sticky;
+  bottom: 0;
+  padding: 1rem 1.5rem;
+  background-color: var(--sidebar-bg);
+  border-top: 1px solid var(--border-color);
+}
+
+.logout i {
+  margin-right: 12px;
+}
+.logout-btn {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  width: 100%;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.logout-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.logout-btn i {
+  margin-right: 0.5rem;
+}
+
+#cancelLogout:hover {
+  background-color: #45494e;
+}
+
+#confirmLogout:hover {
+  background-color: #1177bb;
+}
+
+.modal-content {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+/* Main content area - centered content */
+.main-content {
+  flex: 1;
+  margin-left: 240px;
+  padding: 24px;
+  width: calc(100% - 240px);
+  min-height: 100vh;
+  transition: margin-left 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Header for mobile view */
+.header {
+  display: none;
+  width: 100%;
+  padding: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: var(--bg-dark);
+}
+
+/* Scanner Content Area */
+.scanner-content {
+  max-width: 480px;
+  width: 100%;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.logo-text {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.card {
+  background-color: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  padding: 30px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  margin-bottom: 24px;
+}
+
+h2 {
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* QR Scanner Styles */
+#reader {
+  width: 100%;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  background-color: var(--input-bg);
+  margin-bottom: 20px;
+}
+
+#scannerUI {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%;
+  margin-bottom: 20px;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.scanner-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 10;
+}
+
+.scanner-msg {
+  color: var(--text-primary);
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 15px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  max-width: 80%;
+  text-align: center;
+}
+
+.scan-btn {
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-weight: 500;
+  margin-top: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.scan-btn:hover {
+  background-color: #5d4ab3;
+  transform: translateY(-2px);
+}
+
+/* Status and Message Styles */
+.status-message {
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.scanner-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid #333;
+  padding: 12px 16px;
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  margin-top: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+.btn-success {
+  background-color: var(--accent-green);
+  border-color: var(--accent-green);
+}
+
+.btn i {
+  font-size: 1.1rem;
+}
+
+/* Confirmation Overlay */
+.confirmation-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 2000;
+  backdrop-filter: blur(5px);
+  align-items: center;
+  justify-content: center;
+}
+
+.confirmation-card {
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  padding: 24px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+}
+
+.confirmation-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.confirmation-icon {
+  font-size: 48px;
+  color: var(--accent-blue);
+  margin-bottom: 15px;
+}
+
+.confirmation-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.confirmation-subtitle {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.payment-details {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 20px 0;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.detail-row:last-child {
+  margin-bottom: 0;
+}
+
+.detail-label {
+  color: var(--text-secondary);
+}
+
+.detail-value {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border-color);
+  font-weight: 600;
+}
+
+.confirmation-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.confirmation-actions .btn {
+  margin-top: 0;
+  flex: 1;
+}
+
+.btn-cancel {
+  background-color: transparent;
+  border-color: var(--border-color);
+}
+
+.btn-confirm {
+  background-color: var(--accent-green);
+  border-color: var(--accent-green);
+}
+
+/* Success/Error messages */
+.result-message {
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  text-align: center;
+  display: none;
+}
+
+.success-message {
+  background-color: rgba(0, 202, 114, 0.1);
+  color: var(--accent-green);
+  border: 1px solid rgba(0, 202, 114, 0.2);
+}
+
+.error-message {
+  background-color: rgba(254, 94, 118, 0.1);
+  color: var(--accent-red);
+  border: 1px solid rgba(254, 94, 118, 0.2);
+}
+
+/* Overlay when sidebar is active on mobile */
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  backdrop-filter: blur(2px);
+}
+
+.overlay.active {
+  display: block;
+}
+
+/* Loading spinner */
+.spinner {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 3px solid var(--accent);
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1050;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+}
+
+.modal-content {
+  background-color: var(--card-bg);
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 15px;
+}
+
+.modal-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.modal-body {
+  padding: 10px 0;
+  margin-bottom: 15px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border-color);
+}
+
+.modal-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+/* Animation for scan button */
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(109, 90, 205, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(109, 90, 205, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(109, 90, 205, 0); }
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Fixed Responsive breakpoints */
+@media screen and (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: 280px; /* Slightly wider on mobile */
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .close-sidebar {
+    display: block;
+  }
+
+  .sidebar-toggle {
+    display: block;
+  }
+
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 16px;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Prevent body scroll when sidebar is open */
+  body.sidebar-open {
+    overflow: hidden;
+  }
+  
+  .overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    backdrop-filter: blur(2px);
+  }
+
+  .overlay.active {
+    display: block;
+  }
+}
+
+/* Adaptations for the QR reader UI */
+#reader {
+  border: none !important;
+  background: transparent !important;
+}
+
+#reader__scan_region {
+  background: var(--input-bg) !important;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+#reader__dashboard {
+  border-top: none !important;
+  margin-top: 16px;
+}
+
+#reader__dashboard_section_swaplink {
+  color: var(--accent-blue) !important;
+}
+
+#reader__dashboard_section_csr span {
+  color: var(--text-secondary) !important;
+}
+
+#reader__dashboard_section_fsr span {
+  color: var(--text-secondary) !important;
+}
+
+#reader__dashboard_section_csr button {
+  background-color: var(--accent) !important;
+  border: none !important;
+  border-radius: 4px !important;
+  color: white !important;
+  padding: 8px 16px !important;
+  margin-top: 8px !important;
+}
+
+#reader__dashboard_section_fsr input[type="file"] {
+  color: var(--text-secondary) !important;
+}
+
+#reader__filescan_input {
+  color: var(--text-secondary) !important;
+}
+
+#reader__status_span {
+  color: var(--text-secondary) !important;
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  border-radius: 4px !important;
+  padding: 4px 8px !important;
+}
+
+/* Animation for fadeIn */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Add these styles for file upload functionality */
+.btn-file {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-file input[type=file] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 100%;
+  min-height: 100%;
+  font-size: 100px;
+  text-align: right;
+  filter: alpha(opacity=0);
+  opacity: 0;
+  outline: none;
+  background: white;
+  cursor: inherit;
+  display: block;
+}
+
+/* Loading state for status message */
+.loading {
+  display: inline-block;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}

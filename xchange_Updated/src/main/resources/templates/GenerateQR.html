@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta name="user-id" th:content="${userId}">
+  <meta name="username" th:content="${username}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generate Payment QR</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link th:href="@{/css/GenerateQR.css}" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+      <div class="logo">
+          <div class="logo-icon">
+              <i class="fas fa-qrcode"></i>
+          </div>
+          <span>Xchange</span>
+      </div>
+      <button class="close-sidebar">
+          <i class="fas fa-times"></i>
+      </button>
+  </div>
+  <div class="menu-section">
+      <div class="menu-title">Menu</div>
+      <div class="menu-item">
+          <i class="fas fa-th-large"></i>
+          <span><a href="/dashboard">Dashboard</a></span>
+      </div>
+      <div class="menu-item active">
+          <i class="fas fa-qrcode"></i>
+          <span><a href="/generate-qr">Generate QR </a></span>
+      </div>
+      <div class="menu-item">
+          <i class="fa-solid fa-expand"></i>
+          <span><a href="/scan-pay">Scan QR</a></span>
+      </div>
+      <div class="menu-item">
+          <i class="fas fa-exchange-alt"></i>
+          <span><a href="">Transactions</a></span>
+      </div>
+      <div class="menu-item">
+          <i class="fas fa-chart-line"></i>
+          <span><a href="">Analytics</a></span>
+      </div>
+      <div class="menu-item">
+          <i class="fas fa-cog"></i>
+          <span><a href="">Settings</a></span>
+      </div>
+  </div>
+
+  <div class="menu-section">
+    <div class="menu-title">Payment Methods</div>
+    <div class="menu-item">
+      <i class="fab fa-bitcoin"></i>
+      <span style="margin-left:5px;">Bitcoin</span>
+    </div>
+    <div class="menu-item">
+      <i class="fab fa-ethereum"></i>
+      <span style="margin-left:5px;">Ethereum</span>
+    </div>
+    <div class="menu-item">
+      <i class="fas fa-dollar-sign"></i>
+      <span style="margin-left:5px;">USD</span>
+    </div>
+  </div>
+
+  <div class="logout">
+    <i class="fas fa-sign-out-alt"></i>
+    <span style="cursor:pointer;">Logout</span>
+  </div>
+</div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Mobile Header with Sidebar Toggle -->
+      <div class="header">
+        <button id="sidebar-toggle" class="sidebar-toggle">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+
+      <!-- QR Content -->
+      <div class="qr-content">
+        <header>
+          <div class="logo-text">PayQR</div>
+          <div class="subtitle">Quick and secure payments</div>
+        </header>
+
+        <!-- Amount Entry Screen -->
+        <div id="amount-screen" class="screen actives">
+          <div class="card">
+            <h2>Create Payment QR Code</h2>
+            <div class="form-group">
+              <label class="form-label">AMOUNT</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span id="currency-symbol">₦</span>
+                </div>
+                <input type="number" id="amount-input" class="form-control" 
+                       placeholder="0.00" step="0.01" min="0">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">CURRENCY</label>
+              <select id="currency-select" class="form-control">
+                <option value="NGN" selected>NGN - Nigerian Naira</option>
+                <option value="USD">USD - US Dollar</option>
+                <option value="BTC">BTC - Bitcoin</option>
+                <option value="ETH">ETH - Ethereum</option>
+              </select>
+            </div>
+
+            <button id="generate-btn" class="btn btn-primary">Generate QR Code</button>
+            <div id="error-message" class="error-message"></div>
+          </div>
+        </div>
+
+        <!-- QR Code Display Screen -->
+        <div id="qr-screen" class="screen">
+          <div class="card">
+            <div class="qr-header">
+              <button id="back-btn" class="btn-icon">
+                <i class="fas fa-arrow-left"></i>
+              </button>
+              <h2>Scan the QR code to pay</h2>
+            </div>
+
+            <div class="amount-display">
+              <div class="label">Amount</div>
+              <div id="final-amount" style="color:white;" class="value">₦0.00</div>
+            </div>
+
+            <div id="qr-wrapper">
+              <div class="spinner" id="qr-loading"></div>
+              <div class="qr-container">
+                <div id="qr-code" class="qr-code"></div>
+                <div class="qr-status">
+                  <div class="status">
+                    <span class="status-label">Status:</span>
+                    <span class="status-value">Waiting for payment...</span>
+                  </div>
+                  <div class="timer">
+                    <span class="timer-label">Expires in:</span>
+                    <span class="timer-value">15:00</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="action-buttons">
+              <button id="download-btn" class="btn btn-primary">
+                <i class="fas fa-download"></i> Download QR
+              </button>
+              <button id="share-btn" class="btn">
+                <i class="fas fa-share-alt"></i> Share
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay for mobile sidebar -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Logout Modal -->
+  <div id="logoutModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7);">
+    <div class="modal-content" style="background-color: #1e1e1e; margin: 15% auto; padding: 20px; border: 1px solid #333; width: 80%; max-width: 400px; border-radius: 3px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); color: #d4d4d4; font-family: 'Consolas', 'Monaco', monospace;">
+      <h3 style="color: #9cdcfe; margin-top: 0; font-size: 16px; border-bottom: 1px solid #333; padding-bottom: 10px;">Confirm Logout</h3>
+      <p style="color: #cccccc; margin: 15px 0;">Are you sure you want to logout?</p>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button id="cancelLogout" style="padding: 6px 12px; background-color: #3a3d41; color: #cccccc; border: 1px solid #3a3d41; border-radius: 2px; cursor: pointer; font-family: 'Consolas', 'Monaco', monospace; font-size: 12px;">Cancel</button>
+        <button id="confirmLogout" style="padding: 6px 12px; background-color: #0e639c; color: white; border: 1px solid #0e639c; border-radius: 2px; cursor: pointer; font-family: 'Consolas', 'Monaco', monospace; font-size: 12px;">Yes, Logout</button>
+      </div>
+    </div>
+  </div>
+  <script th:inline="javascript">
+    // Get user data from meta tags
+    const userId = document.querySelector('meta[name="user-id"]').content;
+    const username = document.querySelector('meta[name="username"]').content;
+    
+    // Currency symbols mapping
+    const currencySymbols = {
+      NGN: '₦',
+      USD: '$',
+      BTC: '₿',
+      ETH: 'Ξ'
+    };
+
+    // Get DOM elements
+    const amountScreen = document.getElementById('amount-screen');
+    const qrScreen = document.getElementById('qr-screen');
+    const amountInput = document.getElementById('amount-input');
+    const currencySelect = document.getElementById('currency-select');
+    const currencySymbol = document.getElementById('currency-symbol');
+    const generateBtn = document.getElementById('generate-btn');
+    const backBtn = document.getElementById('back-btn');
+    const finalAmount = document.getElementById('final-amount');
+    const qrContainer = document.getElementById('qr-code');
+    const qrWrapper = document.getElementById('qr-wrapper');
+    const downloadBtn = document.getElementById('download-btn');
+    const shareBtn = document.getElementById('share-btn');
+    const errorMessage = document.getElementById('error-message');
+    const qrLoading = document.getElementById('qr-loading');
+    
+    // For tracking timer and QR state
+    let qrImageReady = false;
+    let currentTimer = null;
+    
+    // Update currency symbol when currency changes
+    currencySelect.addEventListener('change', function() {
+      currencySymbol.textContent = currencySymbols[this.value];
+    });
+
+    // Generate QR code button
+    generateBtn.addEventListener('click', async function() {
+      try {
+        const amount = parseFloat(amountInput.value);
+        const currency = currencySelect.value;
+        
+        // Validate input
+        if (isNaN(amount) || amount <= 0) {
+          showError('Please enter a valid amount');
+          return;
+        }
+
+        // Show loading state
+        generateBtn.disabled = true;
+        generateBtn.textContent = 'Generating...';
+        errorMessage.style.display = 'none';
+        qrImageReady = false;
+        
+        // Prepare data to send
+        const paymentData = {
+          userId: userId,
+          username: username,
+          amount: amount,
+          currency: currency,
+          timestamp: new Date().toISOString()
+        };
+
+        // Show QR screen with loading state
+        amountScreen.classList.remove('actives');
+        qrScreen.classList.add('actives');
+        finalAmount.textContent = `${currencySymbols[currency]}${formatAmount(amount, currency)}`;
+        
+        // Remove any previous user info and QR code
+        clearQrArea();
+        qrLoading.style.display = 'block';
+
+        try {
+          // Send request to backend with both amount and currency
+          const response = await fetch(`/user/generate?totalAmount=${amount}&currency=${currency}`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(paymentData)
+          });
+      
+          if (!response.ok) {
+              throw new Error(`Server responded with status: ${response.status}`);
+          }
+      
+          const data = await response.json();
+          
+          // Hide loading spinner
+          qrLoading.style.display = 'none';
+      
+          // Add user info with amount and currency
+          const userInfo = document.createElement('div');
+          userInfo.className = 'user-info';
+          userInfo.innerHTML = `
+              <div class="user-detail">Recipient: ${data.username || username}</div>
+              <div class="user-detail">ID: ${data.sellerId || userId}</div>
+              <div class="user-detail">Amount: ${currencySymbols[currency]}${formatAmount(amount, currency)}</div>
+          `;
+          insertBeforeQrCode(userInfo);
+
+          // Display QR code
+          const qrImage = document.createElement('img');
+          qrImage.src = `data:image/png;base64,${data.qrCodeImage}`;
+          qrImage.alt = "Payment QR Code";
+          qrImage.onload = function() {
+            qrImageReady = true;
+            downloadBtn.classList.add('download-active');
+          };
+          qrContainer.appendChild(qrImage);
+
+          // Start the expiration timer
+          startTimer();
+          
+        } catch (error) {
+          // If backend fails, create a fallback QR code using qrcodejs
+          qrLoading.style.display = 'none';
+          console.warn('Backend QR generation failed, using fallback:', error);
+          
+          // Create fallback payment URL with data
+          const paymentString = JSON.stringify({
+            action: "payment",
+            amount: amount,
+            currency: currency,
+            recipient: username,
+            id: userId,
+            timestamp: new Date().toISOString()
+          });
+          
+          // Create QR code using the library
+          new QRCode(qrContainer, {
+            text: paymentString,
+            width: 190,
+            height: 190,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+          });
+          
+          // Add fallback user info
+          const userInfo = document.createElement('div');
+          userInfo.className = 'user-info';
+          userInfo.innerHTML = `
+            <div class="user-detail">Recipient: ${username}</div>
+            <div class="user-detail">ID: ${userId}</div>
+            <div class="user-detail"><small>(Fallback QR code)</small></div>
+          `;
+          insertBeforeQrCode(userInfo);
+          
+          // Enable download after a short delay to ensure QR is rendered
+          setTimeout(() => {
+            qrImageReady = true;
+            downloadBtn.classList.add('download-active');
+          }, 500);
+          
+          // Start the timer
+          startTimer();
+        }
+
+      } catch (error) {
+        console.error('Error generating QR code:', error);
+        showError('Failed to generate QR code. Please try again.');
+        // Return to amount screen if we can't generate a QR
+        qrScreen.classList.remove('active');
+        amountScreen.classList.add('active');
+      } finally {
+        generateBtn.disabled = false;
+        generateBtn.textContent = 'Generate QR Code';
+      }
+    });
+
+    // Function to insert element before QR code
+    function insertBeforeQrCode(element) {
+      qrContainer.parentElement.insertBefore(element, qrContainer);
+    }
+    
+    // Function to clear QR area for new generation
+    function clearQrArea() {
+      qrContainer.innerHTML = '';
+      const userInfo = qrWrapper.querySelector('.user-info');
+      if (userInfo) {
+        userInfo.remove();
+      }
+      downloadBtn.classList.remove('download-active');
+      
+      // Reset timer if exists
+      if (currentTimer) {
+        clearInterval(currentTimer);
+        document.querySelector('.timer-value').textContent = '15:00';
+        document.querySelector('.status-value').textContent = 'Waiting for payment...';
+      }
+    }
+
+    // Show error message
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
+      setTimeout(() => {
+        errorMessage.style.display = 'none';
+      }, 5000);
+    }
+
+    // Back button
+    backBtn.addEventListener('click', function() {
+      qrScreen.classList.remove('active');
+      amountScreen.classList.add('active');
+      
+      // Clear timer if exists
+      if (currentTimer) {
+        clearInterval(currentTimer);
+        currentTimer = null;
+      }
+      
+      // Reset QR state
+      qrImageReady = false;
+    });
+
+    // Timer function
+    function startTimer() {
+      let seconds = 900; // 15 minutes
+      const timerElement = document.querySelector('.timer-value');
+      const statusElement = document.querySelector('.status-value');
+      
+      // Clear any existing timer
+      if (currentTimer) {
+        clearInterval(currentTimer);
+      }
+      
+      // Set initial timer display
+      timerElement.textContent = '15:00';
+      statusElement.textContent = 'Waiting for payment...';
+      
+      currentTimer = setInterval(function() {
+        seconds--;
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        timerElement.textContent = 
+          `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        
+        if (seconds <= 0) {
+          clearInterval(currentTimer);
+          currentTimer = null;
+          timerElement.textContent = 'Expired';
+          statusElement.textContent = 'QR Code expired';
+          downloadBtn.classList.remove('download-active');
+          qrImageReady = false;
+        }
+      }, 1000);
+    }
+
+    // Format amount based on currency
+    function formatAmount(amount, currency) {
+      switch(currency) {
+        case 'BTC':
+        case 'ETH':
+          return amount.toFixed(8);
+        default:
+          return amount.toFixed(2)
+            .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+    }
+
+    // Handle download
+    downloadBtn.addEventListener('click', function() {
+      if (!qrImageReady) {
+        showError('QR code is not ready for download yet.');
+        return;
+      }
+      
+      try {
+        // Get the QR code image (either direct <img> or from QRCode library)
+        let qrImage = qrContainer.querySelector('img');
+        
+        // If using QRCode library, it creates canvas or img elements
+        if (!qrImage) {
+          qrImage = qrContainer.querySelector('canvas');
+          if (!qrImage) {
+            throw new Error('No QR image or canvas found');
+          }
+        }
+        
+        // Create a canvas to properly handle the download
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas dimensions
+        const size = 220; // QR size
+        canvas.width = size;
+        canvas.height = size;
+        
+        // Fill with white background
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, size, size);
+        
+        // Draw the image on the canvas
+        if (qrImage instanceof HTMLCanvasElement) {
+          // If the source is already a canvas
+          ctx.drawImage(qrImage, 0, 0, size, size);
+        } else {
+          // If the source is an image
+          ctx.drawImage(qrImage, 0, 0, qrImage.naturalWidth || size, qrImage.naturalHeight || size, 
+                        0, 0, size, size);
+        }
+        
+        // Convert canvas to data URL
+        const dataUrl = canvas.toDataURL('image/png');
+        
+        // Create download link
+        const link = document.createElement('a');
+        const currency = currencySelect.value;
+        const amount = amountInput.value;
+        
+        // Name the file with the amount and currency
+        link.download = `payment-${currency}-${amount}.png`;
+        link.href = dataUrl;
+        link.click();
+        
+        // Visual feedback
+        downloadBtn.classList.remove('download-active');
+        setTimeout(() => {
+          downloadBtn.classList.add('download-active');
+        }, 100);
+      } catch (error) {
+        console.error('Download failed:', error);
+        showError('Failed to download QR code.');
+      }
+    });
+
+    // Handle share
+    shareBtn.addEventListener('click', async function() {
+      if (!qrImageReady) {
+        showError('QR code is not ready for sharing yet.');
+        return;
+      }
+      
+      try {
+        const currency = currencySelect.value;
+        const amount = amountInput.value;
+        
+        // Check if Web Share API is available
+        if (navigator.share) {
+          await navigator.share({
+            title: 'Payment QR Code',
+            text: `Payment amount: ${currencySymbols[currency]}${formatAmount(parseFloat(amount), currency)}`,
+            url: window.location.href
+          });
+        } else {
+          // Fallback if Web Share API is not available
+          showError('Sharing is not supported on this device or browser.');
+        }
+      } catch (err) {
+        console.log('Share failed:', err);
+        if (err.name !== 'AbortError') {
+          showError('Sharing failed. This feature may not be supported on your device.');
+        }
+      }
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get the logout button from the sidebar
+      const logoutBtn = document.querySelector('.logout');
+      const logoutModal = document.getElementById('logoutModal');
+      const cancelBtn = document.getElementById('cancelLogout');
+      const confirmBtn = document.getElementById('confirmLogout');
+      
+      // Show the modal when clicking the logout button
+      logoutBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        logoutModal.style.display = 'block';
+      });
+      
+      // Close the modal when clicking the cancel button
+      cancelBtn.addEventListener('click', function() {
+        logoutModal.style.display = 'none';
+      });
+      
+      // Handle logout when clicking the confirm button
+      confirmBtn.addEventListener('click', function() {
+        // Show a subtle loading effect on the button
+        confirmBtn.innerHTML = 'Logging out...';
+        confirmBtn.style.opacity = '0.7';
+        confirmBtn.disabled = true;
+        
+        // Make a POST request to the logout endpoint
+        fetch('/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            // Include CSRF token if your application uses it
+            // 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+          },
+          credentials: 'same-origin' // Include cookies in the request
+        })
+        .then(response => {
+          if (response.redirected) {
+            // If the server redirects, follow the redirect
+            window.location.href = response.url;
+          } else {
+            // Otherwise redirect to login page
+            window.location.href = '/login?logout=success';
+          }
+        })
+        .catch(error => {
+          console.error('Logout error:', error);
+          window.location.href = '/login';
+        });
+      });
+      
+      // Close the modal if the user clicks outside of it
+      window.addEventListener('click', function(event) {
+        if (event.target === logoutModal) {
+          logoutModal.style.display = 'none';
+        }
+      });
+      
+      // Add keyboard support (Esc to cancel, Enter to confirm)
+      document.addEventListener('keydown', function(e) {
+        if (logoutModal.style.display === 'block') {
+          if (e.key === 'Escape') {
+            logoutModal.style.display = 'none';
+          } else if (e.key === 'Enter') {
+            confirmBtn.click();
+          }
+        }
+      });
+    });
+// Add this at the end of your script section
+document.addEventListener('DOMContentLoaded', function() {
+  // Get DOM elements
+  const sidebar = document.getElementById('sidebar');
+  const sidebarToggle = document.getElementById('sidebar-toggle');
+  const closeSidebarBtn = document.querySelector('.close-sidebar');
+  const overlay = document.getElementById('overlay');
+  
+  // Toggle sidebar function
+  function toggleSidebar() {
+      if (sidebar && overlay) {
+          sidebar.classList.toggle('active');
+          overlay.classList.toggle('active');
+          document.body.classList.toggle('sidebar-open');
+      }
+  }
+  
+  // Add event listeners
+  if (sidebarToggle) {
+      sidebarToggle.addEventListener('click', toggleSidebar);
+  }
+  
+  if (closeSidebarBtn) {
+      closeSidebarBtn.addEventListener('click', toggleSidebar);
+  }
+  
+  if (overlay) {
+      overlay.addEventListener('click', toggleSidebar);
+  }
+  
+  // Close sidebar on window resize if screen becomes large
+  window.addEventListener('resize', () => {
+      if (window.innerWidth > 768) {
+          sidebar.classList.remove('active');
+          overlay.classList.remove('active');
+          document.body.classList.remove('sidebar-open');
+      }
+  });
+});
+document.addEventListener('DOMContentLoaded', function() {
+  // Intercept all fetch/ajax calls
+  const originalFetch = window.fetch;
+  window.fetch = function() {
+      return originalFetch.apply(this, arguments)
+          .then(response => {
+              if (response.status === 401) {
+                  // Check if session expired
+                  const sessionExpired = response.headers.get('X-Session-Expired');
+                  if (sessionExpired) {
+                      window.location.href = '/login';
+                  }
+              }
+              return response;
+          });
+  }
+});
+  </script>
+</body>
+</html>

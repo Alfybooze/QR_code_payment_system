@@ -1,0 +1,609 @@
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #2196F3;
+    --dark-color: #333;
+    --light-color: #f4f4f4;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    background-color: black;
+    color: white;
+
+}
+/* Navbar Styles */
+.navbar {
+    background: transparent;
+    transition: all 0.5s ease;
+    padding: 1.5rem 0;
+}
+
+.navbar.scrolled {
+    background: rgba(0, 0, 0, 0.95);
+    padding: 1rem 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: white !important;
+}
+
+.navbar-brand i {
+    color: var(--primary-color);
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500;
+    padding: 0.5rem 1rem !important;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.nav-link:not(.btn)::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 50%;
+    background: var(--primary-color);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.nav-link:not(.btn):hover::after {
+    width: 100%;
+}
+
+.nav-link.btn {
+    border-radius: 25px;
+    padding: 0.5rem 1.5rem !important;
+}
+
+.nav-link.btn-primary {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.nav-link.btn-outline-light:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 991px) {
+         .navbar-collapse {
+        background: rgba(0, 0, 0, 0.95);
+        padding: 1rem;
+        border-radius: 10px;
+        margin-top: 1rem;
+        width: 100%; /* Ensure full width */
+        position: absolute;
+        top: 100%;
+        right: 0;
+        left: 0;
+        z-index: 1000;
+    }
+    .navbar-nav {
+        padding: 1rem;
+    }
+        
+        /* Ensure mobile menu is visible when open */
+        .navbar-collapse.show {
+            display: block !important;
+        }
+        
+        /* Fix navbar brand and toggle positioning */
+        .navbar > .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        .nav-item {
+            margin: 0.5rem 0;
+            text-align: center;
+        }
+        
+        /* Ensure the button itself is visible */
+        .navbar-toggler {
+            display: block !important;
+        }
+        .nav-item.ms-lg-3 {
+            margin-top: 0.75rem;
+        }
+}
+
+/* Hero Section with Video Background */
+.hero-section {
+    position: relative;
+    color: white;
+    padding: 100px 0; /* Reduced padding for mobile */
+    margin-bottom: 30px; /* Reduced margin for mobile */
+    overflow: hidden;
+    a{
+        color: white; 
+        background-color: var(--primary-color);
+        border: none;
+    }
+    
+}
+.hero-section a::hover {
+    background-color: var(--secondary-color);   
+    color: white;
+}
+
+.hero-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+}
+
+/* Feature Cards with Image Backgrounds */
+.feature-card {
+    border: none;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    z-index: 1;
+}
+
+.feature-card .card-body {
+    position: relative;
+    z-index: 2;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+}
+
+.feature-icon {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover .feature-icon {
+    transform: scale(1.1);
+}
+
+/* How It Works Section with Parallax */
+#how-it-works {
+    position: relative;
+    background: url('/images/pattern.webp') fixed;
+    padding: 80px 0;
+    
+}
+
+.how-it-works-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('/images/pattern.webp') fixed;
+}
+
+/* CTA Section with Gradient Background */
+.cta-section {
+    background: url('/images/pattern.webp') fixed;
+    color: white;
+    padding: 100px 0;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.cta-section::before {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background: url('/images/pattern.webp') fixed;
+    opacity: 0.1;
+    animation: move-background 20s linear infinite;
+}
+.cta-section .btn {
+    padding: 1rem 2rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+.cta-section .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* Contact Section Styles */
+/* Contact Section Styles */
+.contact-section {
+    background: url('/images/pattern.webp') fixed;
+    position: relative;
+}
+
+.contact-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('/images/pattern.webp') fixed;
+
+}
+
+.contact-section .container {
+    position: relative;
+    z-index: 1;
+}
+
+.contact-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.contact-form .form-control {
+    border-radius: 8px;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    transition: all 0.3s ease;
+}
+
+.contact-form .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+}
+
+.contact-info .info-item {
+    text-align: center;
+    padding: 2rem;
+    border-radius: 15px;
+    background-color: white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    height: calc(33.33% - 1rem);
+    margin-bottom: 1.5rem;
+}
+
+.contact-info .info-item:last-child {
+    margin-bottom: 0;
+}
+
+.info-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.info-item i {
+    color: var(--primary-color);
+}
+
+.info-item h5 {
+    margin: 15px 0;
+    color: var(--dark-color);
+    font-weight: 600;
+}
+
+.info-item p {
+    color: #666;
+    margin-bottom: 0;
+}
+
+.info-item a {
+    color: #666;
+    transition: color 0.3s ease;
+}
+
+.info-item a:hover {
+    color: var(--primary-color);
+}
+
+@media (max-width: 991px) {
+    .contact-info {
+        margin-top: 2rem;
+    }
+    .contact-info {
+        margin-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        .info-item {
+            margin-bottom: 1rem;
+            height: auto !important; /* Override fixed height */
+        }
+        
+        .contact-card {
+            height: auto !important; /* Override fixed height */
+        }
+}
+}
+
+
+/* Buttons */
+.btn {
+    position: relative;
+    z-index: 1;
+    cursor: pointer;
+    text-decoration: none;
+}
+.btn-primary {
+    background-color: var(--primary-color);
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--secondary-color);
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* Animated Elements */
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+}
+
+.animate-on-scroll.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+/* Add these styles to your existing CSS */
+
+/* How It Works Section Responsive Styles */
+.steps-list {
+    padding: 20px;
+}
+
+@media (max-width: 768px) {
+    .steps-list {
+        padding: 1rem 0;
+        text-align: center;
+    }
+    .step-item {
+        margin-bottom: 1.5rem;
+    }
+    
+    .step-item p {
+        color: white !important;
+    }
+
+    #how-it-works .row {
+        flex-direction: column;
+    }
+
+    #how-it-works .col-md-6:first-child {
+        margin-bottom: 2rem;
+    }
+
+    #how-it-works h4 {
+        margin-top: 20px;
+    }
+
+    #how-it-works .container {
+        padding: 0 15px;
+    }
+    .hero-section {
+        padding: 80px 0 60px;
+    }
+    
+    .hero-section h1 {
+        font-size: 2rem; /* Smaller font size for mobile */
+    }
+    
+    .hero-section p {
+        font-size: 1rem;
+    }
+    .feature-card {
+        margin-bottom: 1.5rem;
+    }
+    
+    #features .row {
+        margin-bottom: 0;
+    }
+    .nav-link, .btn {
+        padding: 0.75rem 1rem !important; /* Larger touch target */
+    }
+    
+    .btn {
+        display: block;
+        width: 100%;
+    }
+}
+
+
+#how-it-works .steps-list h4 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+#how-it-works .steps-list p {
+    margin-bottom: 25px;
+    color: var(--dark-color);
+}
+/* Animation Classes */
+.fade-in, 
+.slide-in-left, 
+.slide-in-right, 
+.slide-in-up {
+    opacity: 0;
+    visibility: hidden;
+    will-change: transform, opacity;
+}
+
+.fade-in {
+    transform: translateY(20px);
+}
+
+.slide-in-left {
+    transform: translateX(-100px);
+}
+
+.slide-in-right {
+    transform: translateX(100px);
+}
+
+.slide-in-up {
+    transform: translateY(50px);
+}
+
+.fade-in.visible,
+.slide-in-left.visible,
+.slide-in-right.visible,
+.slide-in-up.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(0);
+    transition: all 0.8s cubic-bezier(0.17, 0.55, 0.55, 1);
+}
+
+/* Add animation delay classes */
+.delay-1 { transition-delay: 0.2s; }
+.delay-2 { transition-delay: 0.4s; }
+.delay-3 { transition-delay: 0.6s; }
+/* Add these styles to your CSS file */
+
+/* Header container for mobile view */
+.mobile-header {
+    display: none;
+    align-items: center;
+    padding: 1rem;
+    background-color: var(--bg-dark);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Position the sidebar toggle correctly */
+.sidebar-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    margin-right: 1rem;
+    z-index: 1001;
+}
+
+/* Update main content positioning */
+.main-content {
+    flex: 1;
+    margin-left: 240px;  /* Match sidebar width */
+    padding: 24px;
+    width: calc(100% - 240px);  /* Subtract sidebar width */
+    min-height: 100vh;
+    transition: margin-left 0.3s ease-in-out;
+    background-color: var(--bg-dark);
+}
+
+/* Responsive breakpoints */
+@media screen and (max-width: 768px) {
+    /* Show mobile header */
+    .mobile-header {
+        display: flex;
+    }
+    
+    /* Position sidebar properly */
+    .sidebar {
+        transform: translateX(-100%);
+        width: 280px; /* Slightly wider on mobile */
+        z-index: 1010;
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    /* Show toggle button */
+    .sidebar-toggle {
+        display: block;
+    }
+
+    /* Adjust main content */
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding-top: 16px; /* Reduced padding to account for mobile header */
+    }
+
+    /* Hide desktop header if needed */
+    .header .sidebar-toggle {
+        display: none;
+    }
+    .fade-in, 
+    .slide-in-left, 
+    .slide-in-right, 
+    .slide-in-up {
+        transition-duration: 0.6s;
+    }
+    
+    .delay-1.visible,
+    .delay-2.visible,
+    .delay-3.visible {
+        transition-delay: 0.1s;
+    }
+}
+.navbar-toggler {
+    position: relative;
+    z-index: 1050;
+    border: none;
+    padding: 0.5rem;
+    margin-right: 0;
+}
+
+.navbar-toggler:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.navbar-toggler-icon {
+    display: inline-block;
+    width: 1.5em;
+    height: 1.5em;
+    vertical-align: middle;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100%;
+}
+.fade-in, .slide-in-left, .slide-in-right, .slide-in-up {
+    /* Reset any transforms that might affect layout */
+    opacity: 1 !important;
+}

@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XChange - Register</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link th:href="@{/css/Landing.css}" rel="stylesheet">
+    <link th:href="@{/css/authentication.css}" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand fade-in" th:href="@{/}">
+                <i class="fas fa-qrcode me-2"></i>XChange
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item ms-lg-3">
+                        <a class="nav-link btn btn-outline-light px-4" th:href="@{/}">Go back</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Register Section -->
+    <section class="auth-section">
+        <div class="container">
+            <div class="row justify-content-center align-items-center min-vh-80">
+                <div class="col-md-6 col-lg-5">
+                    <div class="card auth-card">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-4">Create Account</h2>
+                            <p class="text-center">Lets get you started, Create an accouunt with us.....</p>
+
+                            <div class="alert alert-danger d-none" id="errorAlert" role="alert"></div>
+                            <div class="alert alert-success d-none" id="successAlert" role="alert"></div>
+
+                            <form id="registerForm" onsubmit="handleRegister(event)">
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Username</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                        <input type="text" class="form-control" id="username" name="username" required>
+                                    </div>
+                                    <div class="error-message"></div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                    </div>
+                                    <div class="error-message"></div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                        <input type="password" class="form-control" id="password" name="password" required>
+                                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="error-message"></div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="role" class="form-label">Account Type</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-user-tag"></i></span>
+                                        <select class="form-select" id="role" name="role" required>
+                                            <option value="ROLE_BUYER">Buyer</option>
+                                            <option value="ROLE_SELLER">Seller</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100 mb-3">Register</button>
+                                <div class="text-center">
+                                    <small>Already have an account? <a th:href="@{/login}">Login here</a></small>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Password toggle functionality
+            const togglePassword = document.getElementById('togglePassword');
+            togglePassword.addEventListener('click', function() {
+                const password = document.getElementById('password');
+                const icon = this.querySelector('i');
+                
+                if (password.type === 'password') {
+                    password.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    password.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        
+            // Form validation
+            const registerForm = document.getElementById('registerForm');
+            const inputs = registerForm.querySelectorAll('input');
+            
+            inputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    validateInput(input);
+                });
+            });
+        
+            function validateInput(input) {
+                const errorDiv = input.closest('.mb-3').querySelector('.error-message');
+                
+                switch(input.id) {
+                    case 'username':
+                        if (input.value.length < 3) {
+                            showError(errorDiv, 'Username must be at least 3 characters');
+                            input.classList.add('is-invalid');
+                        } else {
+                            hideError(errorDiv);
+                            input.classList.remove('is-invalid');
+                            input.classList.add('is-valid');
+                        }
+                        break;
+                    
+                    case 'email':
+                        const emailRegex = /^[A-Za-z0-9+_.-]+@(.+)$/;
+                        if (!emailRegex.test(input.value)) {
+                            showError(errorDiv, 'Please enter a valid email address');
+                            input.classList.add('is-invalid');
+                        } else {
+                            hideError(errorDiv);
+                            input.classList.remove('is-invalid');
+                            input.classList.add('is-valid');
+                        }
+                        break;
+                    
+                    case 'password':
+                        if (input.value.length < 6) {
+                            showError(errorDiv, 'Password must be at least 6 characters');
+                            input.classList.add('is-invalid');
+                        } else {
+                            hideError(errorDiv);
+                            input.classList.remove('is-invalid');
+                            input.classList.add('is-valid');
+                        }
+                        break;
+                }
+            }
+        
+            function showError(element, message) {
+                element.textContent = message;
+                element.style.display = 'block';
+            }
+        
+            function hideError(element) {
+                element.textContent = '';
+                element.style.display = 'none';
+            }
+        });
+        
+        // Form submission handler
+        async function handleRegister(event) {
+            event.preventDefault();
+            
+            const errorAlert = document.getElementById('errorAlert');
+            const successAlert = document.getElementById('successAlert');
+            const submitButton = event.target.querySelector('button[type="submit"]');
+            const form = event.target;
+            
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Registering...';
+        
+            const formData = {
+                username: form.username.value,
+                email: form.email.value,
+                password: form.password.value,
+                role: form.role.value
+            };
+        
+            try {
+                const response = await fetch('/user/registers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+        
+                const data = await response.text();
+        
+                if (response.ok) {
+                    errorAlert.classList.add('d-none');
+                    successAlert.textContent = 'Registration successful! Redirecting to login...';
+                    successAlert.classList.remove('d-none');
+                    
+                    form.querySelectorAll('input, select, button').forEach(element => {
+                        element.disabled = true;
+                    });
+        
+                    setTimeout(() => {
+                        window.location.href = '/login?registered=true';
+                    }, 2000);
+                } else {
+                    errorAlert.textContent = data;
+                    errorAlert.classList.remove('d-none');
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Register';
+                }
+            } catch (error) {
+                errorAlert.textContent = 'An error occurred. Please try again.';
+                errorAlert.classList.remove('d-none');
+                submitButton.disabled = false;
+                submitButton.textContent = 'Register';
+            }
+        }
+        let verificationCode = '';
+  let verificationEmail = '';
+  let registrationFormData = null;
+  let resendTimer = 30;
+  let resendTimerInterval;
+  
+  // Modified handleRegister function
+  async function handleRegister(event) {
+    event.preventDefault();
+    
+    const errorAlert = document.getElementById('errorAlert');
+    const successAlert = document.getElementById('successAlert');
+    const submitButton = event.target.querySelector('button[type="submit"]');
+    const form = event.target;
+    
+    // Basic validation
+    const username = form.username.value;
+    const email = form.email.value;
+    const password = form.password.value;
+    const role = form.role.value;
+    
+    if (username.length < 3) {
+      errorAlert.textContent = 'Username must be at least 3 characters';
+      errorAlert.classList.remove('d-none');
+      return;
+    }
+    
+    const emailRegex = /^[A-Za-z0-9+_.-]+@(.+)$/;
+    if (!emailRegex.test(email)) {
+      errorAlert.textContent = 'Please enter a valid email address';
+      errorAlert.classList.remove('d-none');
+      return;
+    }
+    
+    if (password.length < 6) {
+      errorAlert.textContent = 'Password must be at least 6 characters';
+      errorAlert.classList.remove('d-none');
+      return;
+    }
+    
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+    
+    // Store form data for later use
+    registrationFormData = {
+      username: username,
+      email: email,
+      password: password,
+      role: role
+    };
+    
+    try {
+      // Generate random 6-digit code
+      verificationCode = generateRandomCode(6);
+      verificationEmail = email;
+      
+      // Send verification code to user's email
+      const response = await fetch('/user/send-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          code: verificationCode
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(errorData || 'Failed to send verification email');
+      }
+      
+      // Show the user's email in the modal
+      document.getElementById('userEmail').textContent = email;
+      
+      // Reset alerts
+      errorAlert.classList.add('d-none');
+      successAlert.classList.add('d-none');
+      
+      // Reset verification form if it was previously used
+      document.getElementById('verificationError').classList.add('d-none');
+      document.getElementById('verificationSuccess').classList.add('d-none');
+      document.getElementById('verificationForm').reset();
+      
+      // Reset the resend timer
+      resetResendTimer();
+      
+      // Show verification modal
+      const verificationModal = new bootstrap.Modal(document.getElementById('verificationModal'));
+      verificationModal.show();
+      
+      // Focus the first input field
+      setTimeout(() => {
+        document.querySelector('.code-input').focus();
+      }, 500);
+      
+      // Reset the register button
+      submitButton.disabled = false;
+      submitButton.textContent = 'Register';
+      
+    } catch (error) {
+      errorAlert.textContent = error.message || 'An error occurred. Please try again.';
+      errorAlert.classList.remove('d-none');
+      submitButton.disabled = false;
+      submitButton.textContent = 'Register';
+    }
+  }
+  
+  // Function to verify the entered code
+  async function verifyCode(event) {
+    event.preventDefault();
+    
+    const verificationError = document.getElementById('verificationError');
+    const verificationSuccess = document.getElementById('verificationSuccess');
+    const submitButton = event.target.querySelector('button[type="submit"]');
+    
+    // Get entered code
+    const codeInputs = document.querySelectorAll('.code-input');
+    let enteredCode = '';
+    codeInputs.forEach(input => {
+      enteredCode += input.value;
+    });
+    
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Verifying...';
+    
+    // Verify if code matches
+    if (enteredCode === verificationCode) {
+      // Successful verification
+      verificationError.classList.add('d-none');
+      verificationSuccess.textContent = 'Email verified successfully! Creating your account...';
+      verificationSuccess.classList.remove('d-none');
+      
+      try {
+        // Complete registration with the stored form data
+        const response = await fetch('/user/registers', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(registrationFormData)
+        });
+        
+        const data = await response.text();
+        
+        if (response.ok) {
+          // Registration successful
+          setTimeout(() => {
+            window.location.href = '/login?registered=true';
+          }, 2000);
+        } else {
+          verificationSuccess.classList.add('d-none');
+          verificationError.textContent = data || 'Registration failed. Please try again.';
+          verificationError.classList.remove('d-none');
+          submitButton.disabled = false;
+          submitButton.textContent = 'Verify';
+        }
+      } catch (error) {
+        verificationSuccess.classList.add('d-none');
+        verificationError.textContent = 'An error occurred. Please try again.';
+        verificationError.classList.remove('d-none');
+        submitButton.disabled = false;
+        submitButton.textContent = 'Verify';
+      }
+    } else {
+      // Wrong code
+      verificationSuccess.classList.add('d-none');
+      verificationError.textContent = 'Wrong verification code. Please check your email and try again.';
+      verificationError.classList.remove('d-none');
+      submitButton.disabled = false;
+      submitButton.textContent = 'Verify';
+    }
+  }
+  
+  // Generate random numeric code of specified length
+  function generateRandomCode(length) {
+    let code = '';
+    for (let i = 0; i < length; i++) {
+      code += Math.floor(Math.random() * 10);
+    }
+    return code;
+  }
+  
+  // Reset resend timer
+  function resetResendTimer() {
+    const resendButton = document.getElementById('resendCode');
+    const countdown = document.getElementById('countdown');
+    
+    resendButton.disabled = true;
+    resendTimer = 30;
+    
+    countdown.textContent = `(${resendTimer}s)`;
+    countdown.classList.remove('d-none');
+    
+    clearInterval(resendTimerInterval);
+    
+    resendTimerInterval = setInterval(() => {
+      resendTimer--;
+      countdown.textContent = `(${resendTimer}s)`;
+      
+      if (resendTimer <= 0) {
+        clearInterval(resendTimerInterval);
+        resendButton.disabled = false;
+        countdown.classList.add('d-none');
+      }
+    }, 1000);
+  }
+  
+  // Document ready functions
+  document.addEventListener('DOMContentLoaded', function() {
+    // Existing code from earlier...
+    
+    // Handle code input auto-tabbing
+    const codeInputs = document.querySelectorAll('.code-input');
+    
+    codeInputs.forEach((input, index) => {
+      // Focus next input on keyup
+      input.addEventListener('keyup', function(e) {
+        if (e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+          if (this.value.length === this.maxLength && index < codeInputs.length - 1) {
+            codeInputs[index + 1].focus();
+          }
+        }
+      });
+      
+      // Go back on backspace if empty
+      input.addEventListener('keydown', function(e) {
+        if ((e.key === 'Backspace' || e.key === 'Delete') && this.value.length === 0 && index > 0) {
+          codeInputs[index - 1].focus();
+        }
+      });
+      
+      // Handle paste event for the entire code
+      input.addEventListener('paste', function(e) {
+        e.preventDefault();
+        const pastedData = e.clipboardData.getData('text').trim();
+        
+        // Check if pasted data is numeric and correct length
+        if (/^\d+$/.test(pastedData) && pastedData.length === codeInputs.length) {
+          // Distribute pasted data across inputs
+          for (let i = 0; i < codeInputs.length; i++) {
+            codeInputs[i].value = pastedData.charAt(i);
+          }
+          // Focus the last input
+          codeInputs[codeInputs.length - 1].focus();
+        }
+      });
+    });
+    
+    // Handle resend code button
+    document.getElementById('resendCode').addEventListener('click', async function() {
+      if (this.disabled) return;
+      
+      this.disabled = true;
+      this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...';
+      
+      try {
+        // Generate new code
+        verificationCode = generateRandomCode(6);
+        
+        // Send new verification code
+        const response = await fetch('/api/verification/send-code', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: verificationEmail,
+            code: verificationCode
+          })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.text();
+          throw new Error(errorData || 'Failed to send verification email');
+        }
+        
+        // Reset verification form
+        document.getElementById('verificationError').classList.add('d-none');
+        document.getElementById('verificationSuccess').classList.add('d-none');
+        document.getElementById('verificationForm').reset();
+        
+        // Focus first input
+        document.querySelector('.code-input').focus();
+        
+        // Reset timer
+        resetResendTimer();
+      } catch (error) {
+        const verificationError = document.getElementById('verificationError');
+        verificationError.textContent = error.message || 'Failed to resend verification code. Please try again.';
+        verificationError.classList.remove('d-none');
+        
+        this.disabled = false;
+        this.textContent = 'Resend Code';
+      }
+    });
+    
+    // Handle modal close - reset verification process
+    document.getElementById('verificationModal').addEventListener('hidden.bs.modal', function() {
+      const verificationForm = document.getElementById('verificationForm');
+      const verificationError = document.getElementById('verificationError');
+      const verificationSuccess = document.getElementById('verificationSuccess');
+      
+      verificationForm.reset();
+      verificationError.classList.add('d-none');
+      verificationSuccess.classList.add('d-none');
+      
+      clearInterval(resendTimerInterval);
+    });
+  });
+    </script>
+    <div class="modal fade" id="verificationModal" tabindex="-1" aria-labelledby="verificationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="verificationModalLabel">Email Verification</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="text-center mb-4">
+                <i class="fas fa-envelope-open-text fa-3x text-primary mb-3"></i>
+                <h5>Verify your email address</h5>
+                <p>We've sent a 6-digit verification code to <span id="userEmail" class="fw-bold"></span></p>
+                <p class="small text-muted">Please check your inbox (not spam) and enter the code below</p>
+              </div>
+              
+              <div class="alert alert-danger d-none" id="verificationError" role="alert"></div>
+              <div class="alert alert-success d-none" id="verificationSuccess" role="alert"></div>
+              
+              <form id="verificationForm" onsubmit="verifyCode(event)">
+                <div class="verification-inputs d-flex justify-content-center mb-4">
+                  <input type="text" class="form-control code-input mx-1" maxlength="1" pattern="[0-9]" required>
+                  <input type="text" class="form-control code-input mx-1" maxlength="1" pattern="[0-9]" required>
+                  <input type="text" class="form-control code-input mx-1" maxlength="1" pattern="[0-9]" required>
+                  <input type="text" class="form-control code-input mx-1" maxlength="1" pattern="[0-9]" required>
+                  <input type="text" class="form-control code-input mx-1" maxlength="1" pattern="[0-9]" required>
+                  <input type="text" class="form-control code-input mx-1" maxlength="1" pattern="[0-9]" required>
+                </div>
+                <div class="d-grid gap-2">
+                  <button type="submit" class="btn btn-primary">Verify</button>
+                  <button type="button" class="btn btn-outline-secondary" id="resendCode">
+                    Resend Code <span id="countdown" class="d-none">(30s)</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+</body>
+</html>
