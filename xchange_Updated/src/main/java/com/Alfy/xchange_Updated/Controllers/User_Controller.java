@@ -330,6 +330,7 @@ public ResponseEntity<?> updateBankDetails(
             .body(new ErrorResponse("Failed to update bank details: " + e.getMessage()));
     }
 }
+
 @GetMapping("/transactions")
 public ResponseEntity<?> getUserTransactions(
     @RequestParam(required = false) String filter, 
