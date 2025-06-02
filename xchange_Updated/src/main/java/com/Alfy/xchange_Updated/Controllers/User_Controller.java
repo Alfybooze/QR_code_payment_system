@@ -222,7 +222,7 @@ public class User_Controller {
     
                   // Step 6: Convert amount to Naira using live exchange rates
                   Map<String, Double> exchangeRates = currencyService.getExchangeRates("ngn");
-                  String currency = paymentRequest.getCurrency().toUpperCase();
+                  String currency = paymentRequest.getCurrency();
                   
                   if (!exchangeRates.containsKey(currency)) {
                       throw new RuntimeException("Unsupported currency: " + currency);

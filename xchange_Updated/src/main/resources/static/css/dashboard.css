@@ -811,3 +811,77 @@
   background-color: var(--bg-dark);
   color: var(--text-primary);
 }
+/* Transaction table animations */
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* Notification styles */
+#notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.transaction-notification {
+    background: #2c2c2c;
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    animation: slideInLeft 0.5s;
+    width: 300px;
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.notification-text {
+    flex-grow: 1;
+}
+
+.notification-text strong {
+    display: block;
+    color: #3a80e9;
+}
+
+.notification-text p {
+    margin: 5px 0 0;
+    font-size: 14px;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 5px;
+}
+
+.notification-close:hover {
+    color: white;
+}

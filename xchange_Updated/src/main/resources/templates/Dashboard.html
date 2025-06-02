@@ -11,6 +11,8 @@
    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
   <link th:href="@{/css/dashboard.css}" rel="stylesheet">
 
 </head>
@@ -378,7 +380,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Initialize transaction chart
   initializeTransactionChart();
-
+  initializeWebSocket();
   // Initialize transaction chart with formatted numbers
   async function initializeTransactionChart() {
     try {
@@ -851,6 +853,107 @@ function fixCurrentBalanceDisplay() {
       });
     }
   });
+}
+function updateTransactionTableWithAnimation(newTransaction) {
+    const tableBody = document.querySelector('.rank-table');
+    const rows = tableBody.querySelectorAll('.transaction-row');
+    
+    // Remove the last row with animation
+    if (rows.length >= 5) {
+        const lastRow = rows[rows.length - 1];
+        lastRow.style.animation = 'slideOutRight 0.5s';
+        setTimeout(() => lastRow.remove(), 500);
+    }
+    
+    // Create and add new row with animation
+    const newRow = document.createElement('div');
+    newRow.className = 'rank-row transaction-row';
+    newRow.style.animation = 'slideInLeft 0.5s';
+    
+    newRow.innerHTML = `
+        <div>${newTransaction.timestamp}</div>
+        <div class="${newTransaction.type.toLowerCase()}-amount">
+            ${newTransaction.type === 'INCOMING' ? '+' : '-'}₦${formatNumberWithCommas(newTransaction.amount)}
+        </div>
+        <div style="color: ${newTransaction.status === 'COMPLETED' ? 'var(--accent-green)' : 'var(--accent-red)'}">
+            ${newTransaction.status}
+        </div>
+    `;
+    
+    // Insert new row at the top (after the header)
+    const header = tableBody.querySelector('.rank-table-header');
+    header.insertAdjacentElement('afterend', newRow);
+
+    // Show notification for incoming transactions
+    if (newTransaction.type === 'INCOMING') {
+        showTransactionNotification(newTransaction);
+    }
+}
+function showTransactionNotification(transaction) {
+    // Create notification container if it doesn't exist
+    let notificationContainer = document.getElementById('notification-container');
+    if (!notificationContainer) {
+        notificationContainer = document.createElement('div');
+        notificationContainer.id = 'notification-container';
+        document.body.appendChild(notificationContainer);
+    }
+
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = 'transaction-notification';
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-money-bill-wave"></i>
+            <div class="notification-text">
+                <strong>New Transaction</strong>
+                <p>You received ₦${formatNumberWithCommas(transaction.amount)}</p>
+            </div>
+            <button class="notification-close">&times;</button>
+        </div>
+    `;
+
+    // Add to container
+    notificationContainer.appendChild(notification);
+
+    // Add close button functionality
+    const closeBtn = notification.querySelector('.notification-close');
+    closeBtn.onclick = () => notification.remove();
+
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.5s';
+        setTimeout(() => notification.remove(), 500);
+    }, 5000);
+}
+// Add this after your existing WebSocket initialization code
+function initializeWebSocket() {
+    const socket = new SockJS('/ws');
+    const stompClient = Stomp.over(socket);
+    const userId = document.querySelector('meta[name="user-id"]').content;
+
+    stompClient.connect({}, function(frame) {
+        console.log('Connected to WebSocket');
+        
+        // Subscribe to personal transaction updates
+        stompClient.subscribe('/topic/transactions/' + userId, function(message) {
+            const transaction = JSON.parse(message.body);
+            
+            // Update transaction table
+            updateTransactionTableWithAnimation(transaction);
+            
+            // Show notification for incoming transactions
+            if (transaction.type === 'INCOMING') {
+                showTransactionNotification(transaction);
+                updateUserBalance();
+            }
+        });
+    }, function(error) {
+        console.error('WebSocket connection error:', error);
+        // Try to reconnect after 5 seconds
+        setTimeout(initializeWebSocket, 5000);
+    });
+
+    return stompClient;
 }
   </script>
 </body>

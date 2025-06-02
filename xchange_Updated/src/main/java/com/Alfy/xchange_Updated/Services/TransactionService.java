@@ -1,6 +1,7 @@
 package com.Alfy.xchange_Updated.Services;
 
 import com.Alfy.xchange_Updated.Models.Users;
+import com.Alfy.xchange_Updated.DTO.TransactionNotification;
 import com.Alfy.xchange_Updated.Models.Transaction;
 import com.Alfy.xchange_Updated.Repositories.UsersRepository;
 import com.Alfy.xchange_Updated.Repositories.TransactionRepository;
@@ -27,6 +28,7 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final UsersRepository usersRepository;
+     private final WebSocketService webSocketService;
 
     @Transactional
     public Transaction processPayment(Long buyerId, Long sellerId, Double amount, String currency) {
@@ -49,14 +51,22 @@ public class TransactionService {
 
             Transaction savedTransaction = transactionRepository.save(transaction);
             log.info("Transaction saved successfully with ID: {}", savedTransaction.getId());
-            
+            notifyTransactionParties(savedTransaction);
             return savedTransaction;
         } catch (Exception e) {
             log.error("Failed to process payment: ", e);
             throw new RuntimeException("Payment processing failed: " + e.getMessage());
         }
     }
+      private void notifyTransactionParties(Transaction transaction) {
+        // Notify buyer
+        TransactionNotification buyerNotification = createNotification(transaction, TRANSACTION_TYPE_OUTGOING);
+        webSocketService.notifyTransactionUpdate(String.valueOf(transaction.getBuyer().getId()), buyerNotification);
 
+        // Notify seller
+        TransactionNotification sellerNotification = createNotification(transaction, TRANSACTION_TYPE_INCOMING);
+        webSocketService.notifyTransactionUpdate(String.valueOf(transaction.getSeller().getId()), sellerNotification);
+    }
     public List<Transaction> getTransactionHistory(Long userId) {
         return transactionRepository.findByBuyerIdOrSellerId(userId, userId);
     }
@@ -71,7 +81,16 @@ public class TransactionService {
             return 0.0;
         }
     }
-
+      private TransactionNotification createNotification(Transaction transaction, String type) {
+        TransactionNotification notification = new TransactionNotification();
+        notification.setTimestamp(transaction.getTimestamp().format(DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm")));
+        notification.setAmount(String.format("%.2f", transaction.getAmount()));
+        notification.setType(type);
+        notification.setStatus(transaction.getStatus());
+        notification.setSenderName(transaction.getBuyer().getUsername());
+        notification.setReceiverName(transaction.getSeller().getUsername());
+        return notification;
+    }
     public Double getOutgoingTotal(Long userId) {
         try {
             Double total = transactionRepository.getTotalOutgoing(userId);

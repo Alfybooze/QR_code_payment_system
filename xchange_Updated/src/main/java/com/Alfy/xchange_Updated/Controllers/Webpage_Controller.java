@@ -97,6 +97,8 @@ public String dashboard(Model model, HttpServletRequest request) {
         model.addAttribute("balance", user.getBalance());
         model.addAttribute("jwt_token", jwtToken);
         model.addAttribute("exchangeRates", rates); // Add formatted rates to the model
+        model.addAttribute("AccountNumber", user.getAccountNumber());
+        model.addAttribute("BankName", user.getBankName());
 
         log.debug("Dashboard loaded successfully for user: {}", username);
         return "Dashboard";
