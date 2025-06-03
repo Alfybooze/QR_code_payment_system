@@ -185,7 +185,32 @@
       </div>
     </div>
   </div>
-
+  <!-- Success Modal -->
+<div class="success-modal" id="successModal" style="display: none;">
+    <div class="success-modal-content">
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h2>Payment Successful!</h2>
+        <div class="success-details">
+            <div class="detail-item">
+                <span class="label">Amount Paid:</span>
+                <span class="value" id="successAmount">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Recipient:</span>
+                <span class="value" id="successRecipient">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Transaction ID:</span>
+                <span class="value" id="successTransactionId">-</span>
+            </div>
+        </div>
+       <button id="closeSuccessModal" class="btn-return">
+          <i class="fas fa-times"></i> Close
+        </button>
+    </div>
+</div>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Get user data from meta tags
@@ -318,18 +343,54 @@
                               body: base64Data // Send the original QR data as base64
                           });
           
-                          if (response.ok) {
-                              const result = await response.json();
-                              successMessage.textContent = 'Payment successful!';
-                              successMessage.style.display = 'block';
-                              confirmationOverlay.style.display = 'none';
-                              setTimeout(() => {
-                                  window.location.href = '/dashboard';
-                              }, 2000);
-                          } else {
-                              const errorData = await response.json();
-                              throw new Error(errorData.error || 'Payment failed');
-                          }
+                         if (response.ok) {
+    const result = await response.json();
+    
+    // Update success modal with transaction details
+    document.getElementById('successAmount').textContent = paymentAmount.textContent;
+    document.getElementById('successRecipient').textContent = recipientName.textContent;
+    document.getElementById('successTransactionId').textContent = result.transactionId || 'N/A';
+    
+    // Hide confirmation overlay
+    confirmationOverlay.style.display = 'none';
+    
+    // Show success modal
+    const successModal = document.getElementById('successModal');
+    successModal.style.display = 'flex';
+    
+ if (html5QrCode && html5QrCode.isScanning) {
+        await html5QrCode.stop();
+    }
+    
+    // Add click handler for close button
+    document.getElementById('closeSuccessModal').onclick = () => {
+        successModal.style.display = 'none';
+        // Reset scanner UI
+        scannerOverlay.style.display = 'flex';
+        startScanBtn.style.display = 'block';
+        statusMessage.textContent = 'Position the QR code in front of your camera';
+        errorMessage.style.display = 'none';
+        successMessage.style.display = 'none';
+    };
+    
+
+    // Optional: Add click outside to close
+    successModal.onclick = (e) => {
+        if (e.target === successModal) {
+            successModal.style.display = 'none';
+            // Reset scanner UI
+            scannerOverlay.style.display = 'flex';
+            startScanBtn.style.display = 'block';
+            statusMessage.textContent = 'Position the QR code in front of your camera';
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+        }
+    };
+    }
+  else {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Payment failed');
+}
                       } catch (error) {
                           errorMessage.textContent = error.message || 'Payment failed. Please try again.';
                           errorMessage.style.display = 'block';
