@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="user-id" th:content="${user.id}">
+  <meta name="username" th:content="${user.username}"/>
   <title>XChange - Dashboard</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -157,50 +158,55 @@
         <div class="rate-item">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span><i class="fas fa-naira-sign"></i> NGN to USD</span>
-            <strong>₦1,420.00 = $1.00</strong>
+             <strong th:text="${'₦' + #numbers.formatDecimal(1/exchangeRates.USD, 1, 'COMMA', 2, 'POINT') + ' = $1.00'}">₦1,420.00 = $1.00</strong>
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); text-align: right;">
-            <span class="negative-change">-2.5% (24h)</span>
+            <span th:class="${exchangeRates.USD_change >= 0 ? 'positive-change' : 'negative-change'}"
+                          th:text="${(exchangeRates.USD_change >= 0 ? '+' : '') + #numbers.formatDecimal(exchangeRates.USD_change, 1, 1) + '% (24h)'}">-2.5% (24h)</span>
           </div>
         </div>
         
         <div class="rate-item">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span><i class="fas fa-euro-sign"></i> NGN to EUR</span>
-            <strong>₦1,530.00 = €1.00</strong>
+            <strong th:text="${'₦' + #numbers.formatDecimal(1/exchangeRates.EUR, 1, 'COMMA', 2, 'POINT') + ' = €1.00'}">₦1,530.00 = €1.00</strong>
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); text-align: right;">
-            <span class="negative-change">-1.8% (24h)</span>
+            <span th:class="${exchangeRates.EUR_change >= 0 ? 'positive-change' : 'negative-change'}"
+                          th:text="${(exchangeRates.EUR_change >= 0 ? '+' : '') + #numbers.formatDecimal(exchangeRates.EUR_change, 1, 1) + '% (24h)'}">0(24h)</span>
           </div>
         </div>
         
         <div class="rate-item">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span><i class="fas fa-pound-sign"></i> NGN to GBP</span>
-            <strong>₦1,825.00 = £1.00</strong>
+           <strong th:text="${'₦' + #numbers.formatDecimal(1/exchangeRates.GBP, 1, 'COMMA', 2, 'POINT') + ' = £1.00'}">₦1,825.00 = £1.00</strong>
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); text-align: right;">
-            <span class="negative-change">-2.1% (24h)</span>
+             <span th:class="${exchangeRates.GBP_change >= 0 ? 'positive-change' : 'negative-change'}"
+                          th:text="${(exchangeRates.GBP_change >= 0 ? '+' : '') + #numbers.formatDecimal(exchangeRates.GBP_change, 1, 1) + '% (24h)'}">0(24h)</span>
           </div>
         </div>
         
         <div class="rate-item">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span><i class="fab fa-bitcoin"></i> NGN to BTC</span>
-            <strong>₦66,450,000 = 1 BTC</strong>
+           <strong th:text="${'₦' + #numbers.formatDecimal(1/exchangeRates.BTC, 1, 'COMMA', 2, 'POINT') + ' = 1 BTC'}">₦66,450,000 = 1 BTC</strong>
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); text-align: right;">
-            <span class="positive-change">+1.4% (24h)</span>
+            <span th:class="${exchangeRates.BTC_change >= 0 ? 'positive-change' : 'negative-change'}"
+                          th:text="${(exchangeRates.BTC_change >= 0 ? '+' : '') + #numbers.formatDecimal(exchangeRates.BTC_change, 1, 1) + '% (24h)'}">0(24h)</span>
           </div>
         </div>
         
         <div class="rate-item">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span><i class="fab fa-ethereum"></i> NGN to ETH</span>
-            <strong>₦4,280,000 = 1 ETH</strong>
+           <strong th:text="${'₦' + #numbers.formatDecimal(1/exchangeRates.ETH, 1, 'COMMA', 2, 'POINT') + ' = 1 ETH'}">₦4,280,000 = 1 ETH</strong>
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); text-align: right;">
-            <span class="positive-change">+0.7% (24h)</span>
+             <span th:class="${exchangeRates.ETH_change >= 0 ? 'positive-change' : 'negative-change'}"
+                          th:text="${(exchangeRates.ETH_change >= 0 ? '+' : '') + #numbers.formatDecimal(exchangeRates.ETH_change, 1, 1) + '% (24h)'}">0 (24h)</span>
           </div>
         </div>
       </div>

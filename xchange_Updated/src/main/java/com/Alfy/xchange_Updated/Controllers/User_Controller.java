@@ -7,6 +7,8 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +48,6 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
-import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -208,7 +208,7 @@ public class User_Controller {
             // Step 3: Extract and create PaymentRequest from the qrData
             PaymentRequest paymentRequest = new PaymentRequest();
             paymentRequest.setAmount(Double.valueOf(qrData.get("totalAmount").toString()));
-            paymentRequest.setCurrency(qrData.get("currency").toString());
+            paymentRequest.setCurrency(qrData.get("currency").toString().toLowerCase().trim());
             paymentRequest.setSellerId(Long.valueOf(qrData.get("userId").toString()));
     
             // Step 4: Get the current user (buyer)
@@ -221,14 +221,15 @@ public class User_Controller {
                     .orElseThrow(() -> new RuntimeException("Seller not found"));
     
                   // Step 6: Convert amount to Naira using live exchange rates
-                  Map<String, Double> exchangeRates = currencyService.getExchangeRates("ngn");
+                  Map<String, Double> exchangeRates = currencyService.getExchangeRates("NGN");
                   String currency = paymentRequest.getCurrency();
                   
-                  if (!exchangeRates.containsKey(currency)) {
+                  String currencyKey = currency;
+                  if (!exchangeRates.containsKey(currencyKey)) {
                       throw new RuntimeException("Unsupported currency: " + currency);
                   }
       
-                  Double exchangeRate = exchangeRates.get(currency);
+                  Double exchangeRate = exchangeRates.get(currencyKey);
                   Double amountInNaira = paymentRequest.getAmount() * exchangeRate;
       
                   // Validate the converted amount

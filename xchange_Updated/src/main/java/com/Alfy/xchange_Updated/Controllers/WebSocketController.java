@@ -1,40 +1,41 @@
- package com.Alfy.xchange_Updated.Controllers;
+package com.Alfy.xchange_Updated.Controllers;
 
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.Alfy.xchange_Updated.DTO.TransactionNotification;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @Slf4j
+@RequiredArgsConstructor
 public class WebSocketController {
 
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    @MessageMapping("/transaction")
-    @SendTo("/topic/transactions")
-    public TransactionNotification handleTransaction(@Payload TransactionNotification notification) {
-        log.info("Received transaction notification: {}", notification);
-        return notification;
+    @MessageMapping("/user/{userId}/transaction")
+    public void handleTransaction(@Payload TransactionNotification notification, 
+                                @DestinationVariable String userId) {
+        log.info("Received transaction notification for user {}: {}", userId, notification);
+        sendTransactionNotification(userId, notification);
     }
 
-    public void sendTransactionNotification(String username, TransactionNotification notification) {
-        log.info("Sending notification to user {}: {}", username, notification);
-        messagingTemplate.convertAndSendToUser(
-            username,
-            "/queue/notifications",
-            notification
-        );
-    }
-
-    public void broadcastTransactionUpdate(TransactionNotification notification) {
-        log.info("Broadcasting transaction update: {}", notification);
-        messagingTemplate.convertAndSend("/topic/transactions", notification);
+    public void sendTransactionNotification(String userId, TransactionNotification notification) {
+        try {
+            log.info("Sending notification to user {}: {}", userId, notification);
+            
+            // Send to user's private queue
+            String destination = "/user/" + userId + "/queue/notifications";
+            messagingTemplate.convertAndSend(destination, notification);
+            
+            log.debug("Notification sent successfully to {}", destination);
+        } catch (Exception e) {
+            log.error("Failed to send notification to user {}: {}", userId, e.getMessage());
+        }
     }
 }
