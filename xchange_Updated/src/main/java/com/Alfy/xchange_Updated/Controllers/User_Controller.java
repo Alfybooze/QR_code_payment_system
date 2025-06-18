@@ -40,6 +40,7 @@ import com.Alfy.xchange_Updated.Services.CurrencyService;
 import com.Alfy.xchange_Updated.Services.EmailService;
 import com.Alfy.xchange_Updated.Services.JwtService;
 import com.Alfy.xchange_Updated.Services.QRCodeService;
+import com.Alfy.xchange_Updated.Services.SmsService;
 import com.Alfy.xchange_Updated.Services.TransactionService;
 import com.Alfy.xchange_Updated.Services.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,9 +63,10 @@ public class User_Controller {
     private final TransactionService transactionService;
     private final CurrencyService currencyService;
     private final EmailService emailService;
+    private SmsService smsService;
 
     @Autowired
-    public User_Controller(UserService userService, AuthenticationManager authenticationManager, JwtService jwtService,QRCodeService qrCodeService, UsersRepository usersRepository, TransactionService transactionService, CurrencyService currencyService, EmailService emailService) {
+    public User_Controller(UserService userService, AuthenticationManager authenticationManager, JwtService jwtService,QRCodeService qrCodeService, UsersRepository usersRepository, TransactionService transactionService, CurrencyService currencyService, EmailService emailService, SmsService smsService) {
         this.currencyService = currencyService;
         this.transactionService = transactionService;
         this.usersRepository = usersRepository;
@@ -73,6 +75,7 @@ public class User_Controller {
         this.jwtService = jwtService;
         this.qrCodeService = qrCodeService;
         this.emailService = emailService;
+        this.smsService = smsService;
     }
 
       @PostMapping("/registers")
@@ -222,15 +225,15 @@ public class User_Controller {
     
                   // Step 6: Convert amount to Naira using live exchange rates
                   Map<String, Double> exchangeRates = currencyService.getExchangeRates("NGN");
-                  String currency = paymentRequest.getCurrency();
+                  String currency = paymentRequest.getCurrency().toLowerCase();
                   
-                  String currencyKey = currency;
+                  String currencyKey = "ngn_"+ currency;
                   if (!exchangeRates.containsKey(currencyKey)) {
                       throw new RuntimeException("Unsupported currency: " + currency);
                   }
       
                   Double exchangeRate = exchangeRates.get(currencyKey);
-                  Double amountInNaira = paymentRequest.getAmount() * exchangeRate;
+                  Double amountInNaira = paymentRequest.getAmount() / exchangeRate;
       
                   // Validate the converted amount
                   if (amountInNaira <= 0) {
@@ -257,6 +260,7 @@ public class User_Controller {
                     amountInNaira,
                     currency + "_TO_NGN"
             );
+        
     
             // Step 9: Return success response
             Map<String, Object> response = new HashMap<>();
@@ -268,6 +272,14 @@ public class User_Controller {
             response.put("exchangeRate", exchangeRate);
             response.put("baseCurrency", "NGN");
             response.put("timestamp", LocalDateTime.now().toString());
+
+            smsService.notifyTransactionParties(
+            buyer.getPhoneNumber(),
+            seller.getPhoneNumber(),
+            amountInNaira,
+            buyer.getBalance(),
+            seller.getBalance()
+        );
 
             return ResponseEntity.ok(response);
     

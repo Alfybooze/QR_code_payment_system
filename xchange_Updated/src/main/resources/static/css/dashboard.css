@@ -191,6 +191,18 @@
     .overlay.active {
         display: block;
     }
+        .user-avatar {
+        width: 32px;
+        height: 32px;
+    }
+
+    .user-avatar-text {
+        font-size: 0.875rem;
+    }
+
+    .user-profile-info {
+        display: none;
+    }
 }
 /* Overlay when sidebar is active on mobile */
 .overlay {
@@ -389,7 +401,7 @@
         display: flex;
         align-items: center;
         cursor: pointer;
-        gap:8px;
+        gap:4px;
       }
   
       .user-avatar {
@@ -811,77 +823,402 @@
   background-color: var(--bg-dark);
   color: var(--text-primary);
 }
-/* Transaction table animations */
-@keyframes slideInLeft {
-    from {
-        transform: translateX(-100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
 
-@keyframes slideOutRight {
-    from {
-        transform: translateX(0);
-        opacity: 1;
-    }
-    to {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-}
-
-/* Notification styles */
+/* Replace the existing notification styles with these updated ones */
 #notification-container {
     position: fixed;
-    top: 20px;
+    top: -100%; /* Start off-screen */
     right: 20px;
-    z-index: 1000;
+    z-index: 9999;
+    max-width: 350px;
+    transition: top 0.5s ease-in-out;
 }
 
 .transaction-notification {
-    background: #2c2c2c;
-    color: white;
-    padding: 15px;
+    background: white;
     border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     margin-bottom: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    animation: slideInLeft 0.5s;
-    width: 300px;
+    animation: slideInTop 0.5s forwards;
+    overflow: hidden;
 }
 
+.transaction-notification.closing {
+    animation: slideOutTop 0.5s forwards;
+}
+
+@keyframes slideInTop {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutTop {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+}
+
+/* Update notification positioning */
+.notification-enter {
+    top: 20px; /* Final position when notification appears */
+}
+
+/* Rest of your notification styles remain the same */
 .notification-content {
+    padding: 15px;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
 }
 
 .notification-text {
-    flex-grow: 1;
+    flex: 1;
 }
 
 .notification-text strong {
     display: block;
-    color: #3a80e9;
+    margin-bottom: 4px;
+    color: #2c3e50;
 }
 
 .notification-text p {
-    margin: 5px 0 0;
+    margin: 0;
+    color: #666;
     font-size: 14px;
+}
+
+.notification-text small {
+    display: block;
+    color: #999;
+    font-size: 12px;
+    margin-top: 4px;
 }
 
 .notification-close {
     background: none;
     border: none;
     color: #999;
-    font-size: 20px;
     cursor: pointer;
-    padding: 0 5px;
+    font-size: 18px;
+    padding: 0;
+    transition: color 0.3s ease;
 }
 
 .notification-close:hover {
+    color: #666;
+}
+/* Profile Modal Styles */
+/* Existing styles for .user-profile and .user-avatar (they look good for the button itself) */
+.user-profile {
+    display: inline-flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.user-profile:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem !important; /* Keep this to ensure icon size */
     color: white;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.user-avatar:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+}
+
+.username {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+    margin-right: 10px;
+}
+
+/* Modal Styles - mostly good, just re-ordering for clarity */
+.user-profile-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.user-profile-modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+}
+
+.modal-content {
+    background: linear-gradient(145deg, #1e1e1e 0%, #2a2a2a 100%);
+    border-radius: 20px;
+    width: 90%;
+    max-width: 480px;
+    box-shadow:
+        0 25px 50px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    transform: scale(1);
+    opacity: 1;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.user-profile-modal.show .modal-content {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 25px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.modal-header h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    z-index: 1;
+    position: relative;
+    margin: 0;
+}
+
+.close-modal {
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    z-index: 1;
+    position: relative;
+    background: rgba(255, 255, 255, 0.1);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-modal:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+.profile-info {
+    padding: 30px;
+}
+
+.info-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 15px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+}
+
+/* === MODIFIED STYLES FOR INFO-ROW LAYOUT === */
+.info-row {
+    display: flex;
+    align-items: center; /* Vertically center icon with info-detail content */
+    padding: 15px 10px; /* Slightly adjusted padding */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    margin-bottom: 8px; /* Space between rows */
+}
+
+.info-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.info-row:hover {
+    background: rgba(102, 126, 234, 0.1);
+    transform: translateX(5px);
+    border-left: 3px solid #667eea;
+}
+
+.info-row i {
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0; /* Prevent icon from shrinking */
+    margin-right: 20px;
+    font-size: 1.1rem;
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.info-detail {
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* Allow it to take up remaining space */
+    /* No margin-bottom or padding between label and span directly here */
+}
+
+.info-detail label {
+    font-size: 0.8rem; /* Slightly smaller for label */
+    color: #888;
+    margin-bottom: 4px; /* Small space between label and value */
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-detail span {
+    color: #ffffff;
+    font-size: 0.95rem; /* Slightly smaller for value */
+    font-weight: 600;
+}
+/* === END MODIFIED STYLES === */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.info-row {
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.info-row:nth-child(1) { animation-delay: 0.1s; }
+.info-row:nth-child(2) { animation-delay: 0.2s; }
+.info-row:nth-child(3) { animation-delay: 0.3s; }
+.info-row:nth-child(4) { animation-delay: 0.4s; }
+.info-row:nth-child(5) { animation-delay: 0.5s; }
+
+/* Responsive Design */
+@media (max-width: 480) {
+    .modal-content {
+        width: 95%;
+        margin: 20px;
+    }
+
+    .modal-header {
+        padding: 20px 25px;
+    }
+
+    .profile-info {
+        padding: 25px 20px;
+    }
+
+    .info-row {
+        padding: 12px 10px; /* Adjusted padding for smaller screens */
+    }
+
+    .info-row i {
+        width: 38px; /* Slightly smaller icon */
+        height: 38px;
+        font-size: 1rem;
+        margin-right: 15px;
+    }
+
+    .info-detail label {
+        font-size: 0.75rem; /* Smaller label font size */
+    }
+
+    .info-detail span {
+        font-size: 0.9rem; /* Smaller value font size */
+    }
+}
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease-out;
+}
+
+.loading-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.content {
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.5s ease-in;
+}
+
+.content.visible {
+    visibility: visible;
+    opacity: 1;
 }

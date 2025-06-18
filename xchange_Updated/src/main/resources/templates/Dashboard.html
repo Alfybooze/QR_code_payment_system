@@ -15,9 +15,24 @@
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
   <link th:href="@{/css/dashboard.css}" rel="stylesheet">
+  <script type="module" th:src="@{/js/notifications.js}"></script>
+  <script th:src="@{/js/profile.js}"></script>
+  <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
+    <script th:src="@{/js/loading.js}" defer></script>
 
 </head>
 <body>
+      <div class="loading-overlay" id="loadingOverlay">
+        <dotlottie-player 
+            src="https://lottie.host/dea15329-3deb-4041-befb-1a46439a9296/1sy2yaIuNl.lottie"
+            background="transparent"
+            speed="1"
+            style="width: 200px; height: 200px;"
+            loop
+            autoplay>
+        </dotlottie-player>
+        <p class="loading-text">Loading...</p>
+    </div>
   <div class="container">
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
@@ -94,10 +109,61 @@
             <i class="fas fa-wallet"></i>
             Connect wallet
           </button>
-          <div class="user-profile">
-            <img th:src="@{/images/person-circle.svg}" alt="User" class="user-avatar">
-            <span style="text-transform:uppercase;" th:text="${username}">user</span>
-          </div>
+        <div class="user-profile" onclick="showUserProfileModal()">
+            <div class="user-avatar" >
+                <i class="fas fa-user" style="font-size: 1rem !important;"></i>
+            </div>
+            <span class="username" th:text="${username}">JOHN DOE</span>
+        </div>
+
+      <div id="userProfileModal" class="user-profile-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Profile Details</h2>
+                <span class="close-modal" onclick="hideUserProfileModal()">&times;</span>
+            </div>
+            <div class="profile-info">
+                <div class="info-card">
+                    <div class="info-row">
+                        <i class="fas fa-user"></i>
+                        <div class="info-detail">
+                            <label>Username</label>
+                            <span th:text="${username}"></span>
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <i class="fas fa-envelope"></i>
+                        <div class="info-detail">
+                            <label>Email</label>
+                            <span th:text="${email}"></span>
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <i class="fas fa-university"></i>
+                        <div class="info-detail">
+                            <label>Account Number</label>
+                            <span th:text="${AccountNumber}"></span>
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <i class="fas fa-building-columns"></i>
+                        <div class="info-detail">
+                            <label>Bank Name</label>
+                            <span th:text="${BankName}"></span>
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <i class="fas fa-id-card"></i>
+                        <div class="info-detail">
+                            <label>User ID</label>
+                            <span th:text="${id}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
         </div>
       </div>
       <!-- Currency Overview -->
@@ -158,7 +224,10 @@
         <div class="rate-item">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span><i class="fas fa-naira-sign"></i> NGN to USD</span>
-             <strong th:text="${'₦' + #numbers.formatDecimal(1/exchangeRates.USD, 1, 'COMMA', 2, 'POINT') + ' = $1.00'}">₦1,420.00 = $1.00</strong>
+             <strong th:with="rate=${exchangeRates.get('ngn_usd')}" 
+                    th:text="${rate != null ? '₦' + #numbers.formatDecimal(1/rate, 1, 'COMMA', 2, 'POINT') + ' = $1.00' : 'Rate unavailable'}">
+                ₦1,420.00 = $1.00
+            </strong>
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); text-align: right;">
             <span th:class="${exchangeRates.USD_change >= 0 ? 'positive-change' : 'negative-change'}"
@@ -169,7 +238,10 @@
         <div class="rate-item">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span><i class="fas fa-euro-sign"></i> NGN to EUR</span>
-            <strong th:text="${'₦' + #numbers.formatDecimal(1/exchangeRates.EUR, 1, 'COMMA', 2, 'POINT') + ' = €1.00'}">₦1,530.00 = €1.00</strong>
+            <strong th:with="rate=${exchangeRates.get('ngn_eur')}" 
+                    th:text="${rate != null ? '₦' + #numbers.formatDecimal(1/rate, 1, 'COMMA', 2, 'POINT') + ' = €1.00' : 'Rate unavailable'}">
+                ₦1,530.00 = €1.00
+            </strong>
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); text-align: right;">
             <span th:class="${exchangeRates.EUR_change >= 0 ? 'positive-change' : 'negative-change'}"
@@ -180,7 +252,10 @@
         <div class="rate-item">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span><i class="fas fa-pound-sign"></i> NGN to GBP</span>
-           <strong th:text="${'₦' + #numbers.formatDecimal(1/exchangeRates.GBP, 1, 'COMMA', 2, 'POINT') + ' = £1.00'}">₦1,825.00 = £1.00</strong>
+              <strong th:with="rate=${exchangeRates.get('ngn_gbp')}" 
+                    th:text="${rate != null ? '₦' + #numbers.formatDecimal(1/rate, 1, 'COMMA', 2, 'POINT') + ' = £1.00' : 'Rate unavailable'}">
+                ₦1,825.00 = £1.00
+              </strong>
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); text-align: right;">
              <span th:class="${exchangeRates.GBP_change >= 0 ? 'positive-change' : 'negative-change'}"
@@ -191,7 +266,10 @@
         <div class="rate-item">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span><i class="fab fa-bitcoin"></i> NGN to BTC</span>
-           <strong th:text="${'₦' + #numbers.formatDecimal(1/exchangeRates.BTC, 1, 'COMMA', 2, 'POINT') + ' = 1 BTC'}">₦66,450,000 = 1 BTC</strong>
+                <strong th:with="rate=${exchangeRates.get('ngn_btc')}" 
+                              th:text="${rate != null ? '₦' + #numbers.formatDecimal(1/rate, 1, 'COMMA', 2, 'POINT') + ' = ₿1.00' : 'Rate unavailable'}">
+                          ₦66,450,000 = ₿1.00
+                </strong>
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); text-align: right;">
             <span th:class="${exchangeRates.BTC_change >= 0 ? 'positive-change' : 'negative-change'}"
@@ -202,7 +280,10 @@
         <div class="rate-item">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span><i class="fab fa-ethereum"></i> NGN to ETH</span>
-           <strong th:text="${'₦' + #numbers.formatDecimal(1/exchangeRates.ETH, 1, 'COMMA', 2, 'POINT') + ' = 1 ETH'}">₦4,280,000 = 1 ETH</strong>
+           <strong th:with="rate=${exchangeRates.get('ngn_eth')}" 
+                    th:text="${rate != null ? '₦' + #numbers.formatDecimal(1/rate, 1, 'COMMA', 2, 'POINT') + ' = Ξ1.00' : 'Rate unavailable'}">
+                ₦4,280,000 = Ξ1.00
+            </strong>
           </div>
           <div style="font-size: 0.8rem; color: var(--text-secondary); text-align: right;">
              <span th:class="${exchangeRates.ETH_change >= 0 ? 'positive-change' : 'negative-change'}"
@@ -359,523 +440,454 @@
   </div>
 </div>
   <script>
-  // Initialize transaction chart
-document.addEventListener('DOMContentLoaded', function() {
-  // Format number with commas helper function
-  function formatNumberWithCommas(number) {
-    // Remove currency symbol and any commas first
+// Helper function to format numbers with commas and two decimal places
+function formatNumberWithCommas(number) {
+    // Remove currency symbol and any commas first if it's a string
     if (typeof number === 'string') {
         number = number.replace(/[₦,]/g, '');
     }
-    
+
     // Parse the cleaned number
     const numericValue = parseFloat(number);
-    
+
     // Check if it's a valid number
     if (isNaN(numericValue)) {
-        console.log("Invalid number value:", number);
-        return "0.00";
+        console.warn("Invalid number value provided for formatting:", number);
+        return "0.00"; // Return "0.00" for invalid numbers
     }
-    
-    // Format with commas and decimals
+
+    // Format with commas and decimals, using Nigerian locale for currency formatting
     return numericValue.toLocaleString('en-NG', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
     });
 }
 
-  // Initialize transaction chart
-  initializeTransactionChart();
-  initializeWebSocket();
-  // Initialize transaction chart with formatted numbers
-  async function initializeTransactionChart() {
-    try {
-      const response = await fetch('/user/transaction-chart-data', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
+// --- DOM Content Loaded Initialization ---
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize core functionalities
+    initializeTransactionChart();
+    initializeWebSocket();
+    fetchTransactions(); // Initial fetch of transactions
+    formatAllBalanceElements(); // Ensure all balance displays are formatted on load
+
+    // Set up periodic updates for transactions
+    setInterval(fetchTransactions, 30000); // Refresh transactions every 30 seconds
+
+    // --- Event Listeners ---
+
+    // Menu Item Click Handlers
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // Transaction Rows (for future detail view, currently logs to console)
+    document.querySelectorAll('.transaction-row').forEach(row => {
+        row.addEventListener('click', function() {
+            console.log('Transaction details:', this.children[0].textContent, this.children[1].textContent);
+        });
+    });
+
+    // Sidebar functionality
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const closeSidebar = document.querySelector('.close-sidebar');
+    const overlay = document.getElementById('overlay');
+
+    function toggleSidebar() {
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+        document.body.classList.toggle('sidebar-open');
+    }
+
+    sidebarToggle.addEventListener('click', toggleSidebar);
+    closeSidebar.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', toggleSidebar);
+
+    // Close sidebar on window resize if screen becomes large
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.classList.remove('sidebar-open');
         }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const chartData = await response.json();
-      
-      const ctx = document.getElementById('transactionsChart').getContext('2d');
-      const transactionsChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: chartData.labels,
-          datasets: [{
-            label: 'Transaction Volume',
-            data: chartData.data,
-            backgroundColor: 'rgba(58, 128, 233, 0.1)',
-            borderColor: '#3a80e9',
-            tension: 0.4,
-            fill: true
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  return `₦${formatNumberWithCommas(context.raw)}`;
-                }
-              }
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              grid: {
-                display: true,
-                color: 'rgba(255, 255, 255, 0.05)'
-              },
-              ticks: {
-                color: '#a0a0a0',
-                callback: function(value) {
-                  return '₦' + formatNumberWithCommas(value);
-                }
-              }
-            },
-            x: {
-              grid: { display: false },
-              ticks: { color: '#a0a0a0' }
-            }
-          }
-        }
-      });
-
-      // Update chart periodically
-      setInterval(async () => {
-        const newData = await fetchChartData();
-        transactionsChart.data.labels = newData.labels;
-        transactionsChart.data.datasets[0].data = newData.data;
-        transactionsChart.update();
-      }, 300000); // Update every 5 minutes
-
-    } catch (error) {
-      console.error('Error initializing chart:', error);
-    }
-  }
-
-  async function fetchChartData() {
-    const response = await fetch('/user/transaction-chart-data');
-    const data = await response.json();
-    return data;
-  }
-
-  // Menu Item Click Handlers
-  document.querySelectorAll('.menu-item').forEach(item => {
-    item.addEventListener('click', function() {
-      document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
-      this.classList.add('active');
     });
-  });
-  
-  // Transaction Rows
-  document.querySelectorAll('.transaction-row').forEach(row => {
-    row.addEventListener('click', function() {
-      console.log('Transaction details:', this.children[0].textContent, this.children[1].textContent);
+
+    // Logout functionality
+    const logoutBtn = document.querySelector('.logout');
+    const logoutModal = document.getElementById('logoutModal');
+    const cancelBtn = document.getElementById('cancelLogout');
+    const confirmBtn = document.getElementById('confirmLogout');
+
+    // Show the modal when clicking the logout button
+    logoutBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        logoutModal.style.display = 'block';
     });
-  });
-  
-  // Sidebar functionality
-  const sidebar = document.getElementById('sidebar');
-  const sidebarToggle = document.getElementById('sidebar-toggle');
-  const closeSidebar = document.querySelector('.close-sidebar');
-  const overlay = document.getElementById('overlay');
 
-  function toggleSidebar() {
-    sidebar.classList.toggle('active');
-    overlay.classList.toggle('active');
-    document.body.classList.toggle('sidebar-open');
-  }
-
-  sidebarToggle.addEventListener('click', toggleSidebar);
-  closeSidebar.addEventListener('click', toggleSidebar);
-  overlay.addEventListener('click', toggleSidebar);
-
-  // Close sidebar on window resize if screen becomes large
-  window.addEventListener('resize', () => {
-    if (window.innerWidth > 768) {
-      sidebar.classList.remove('active');
-      overlay.classList.remove('active');
-      document.body.classList.remove('sidebar-open');
-    }
-  });
-
-  // Logout functionality
-  const logoutBtn = document.querySelector('.logout');
-  const logoutModal = document.getElementById('logoutModal');
-  const cancelBtn = document.getElementById('cancelLogout');
-  const confirmBtn = document.getElementById('confirmLogout');
-  
-  // Show the modal when clicking the logout button
-  logoutBtn.addEventListener('click', function(e) {
-    e.preventDefault();
-    logoutModal.style.display = 'block';
-  });
-  
-  // Close the modal when clicking the cancel button
-  cancelBtn.addEventListener('click', function() {
-    logoutModal.style.display = 'none';
-  });
-  
-  // Handle logout when clicking the confirm button
-  confirmBtn.addEventListener('click', function() {
-    // Show a subtle loading effect on the button
-    confirmBtn.innerHTML = 'Logging out...';
-    confirmBtn.style.opacity = '0.7';
-    confirmBtn.disabled = true;
-    
-    // Make a POST request to the logout endpoint
-    fetch('/logout', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        // Include CSRF token if your application uses it
-        // 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-      },
-      credentials: 'same-origin' // Include cookies in the request
-    })
-    .then(response => {
-      if (response.redirected) {
-        // If the server redirects, follow the redirect
-        window.location.href = response.url;
-      } else {
-        // Otherwise redirect to login page
-        window.location.href = '/login?logout=success';
-      }
-    })
-    .catch(error => {
-      console.error('Logout error:', error);
-      window.location.href = '/login';
-    });
-  });
-  
-  // Close the modal if the user clicks outside of it
-  window.addEventListener('click', function(event) {
-    if (event.target === logoutModal) {
-      logoutModal.style.display = 'none';
-    }
-  });
-  
-  // Add keyboard support (Esc to cancel, Enter to confirm)
-  document.addEventListener('keydown', function(e) {
-    if (logoutModal.style.display === 'block') {
-      if (e.key === 'Escape') {
+    // Close the modal when clicking the cancel button
+    cancelBtn.addEventListener('click', function() {
         logoutModal.style.display = 'none';
-      } else if (e.key === 'Enter') {
-        confirmBtn.click();
-      }
-    }
-  });
-
-  // Connect wallet functionality
-  const connectWalletBtn = document.querySelector('.connect-wallet');
-  const saveBankDetailsBtn = document.getElementById('saveBankDetails');
-  const bankDetailsForm = document.getElementById('bankDetailsForm');
-  const connectWalletModal = new bootstrap.Modal(document.getElementById('connectWalletModal'));
-
-  // Show modal when clicking connect wallet button
-  connectWalletBtn.addEventListener('click', function() {
-    connectWalletModal.show();
-  });
-
-  // Handle form submission
-  saveBankDetailsBtn.addEventListener('click', async function() {
-    const form = document.getElementById('bankDetailsForm');
-    const accountNumber = document.getElementById('accountNumber').value;
-    const bankName = document.getElementById('bankName').value;
-
-    if (!form.checkValidity()) {
-      form.classList.add('was-validated');
-      return;
-    }
-
-    try {
-      saveBankDetailsBtn.disabled = true;
-      saveBankDetailsBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Connecting...';
-
-      const response = await fetch('/user/update-bank-details', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `accountNumber=${accountNumber}&bankName=${bankName}`
-      });
-
-      if (response.ok) {
-        // Show success message
-        connectWalletBtn.innerHTML = '<i class="fas fa-check-circle"></i> Account Connected';
-        connectWalletBtn.classList.add('connected');
-        connectWalletModal.hide();
-
-        // Show success toast or alert
-        alert('Bank account connected successfully!');
-      } else {
-        throw new Error('Failed to connect bank account');
-      }
-    } catch (error) {
-      alert('Error connecting bank account: ' + error.message);
-    } finally {
-      saveBankDetailsBtn.disabled = false;
-      saveBankDetailsBtn.innerHTML = 'Connect Account';
-    }
-  });
-
-  // Reset form validation when modal is hidden
-  document.getElementById('connectWalletModal').addEventListener('hidden.bs.modal', function () {
-    bankDetailsForm.classList.remove('was-validated');
-  });
-
-  // Intercept all fetch/ajax calls for session expiration
-  const originalFetch = window.fetch;
-  window.fetch = function() {
-    return originalFetch.apply(this, arguments)
-      .then(response => {
-        if (response.status === 401) {
-          // Check if session expired
-          const sessionExpired = response.headers.get('X-Session-Expired');
-          if (sessionExpired) {
-            window.location.href = '/login';
-          }
-        }
-        return response;
-      });
-  }
-
-  // Format all balance elements on the page
-  function formatAllBalanceElements() {
-    // Fix the inconsistent class name by selecting both variations
-    const balanceElements = document.querySelectorAll('.Available_balance, .Avalable_balance');
-    
-    balanceElements.forEach(element => {
-      if (element.textContent && !isNaN(parseFloat(element.textContent))) {
-        element.textContent = formatNumberWithCommas(element.textContent);
-      }
     });
-  }
 
-  // Function to fetch and display transactions
-  async function fetchTransactions() {
-    try {
-      const response = await fetch('/user/transactions?limit=5', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
+    // Handle logout when clicking the confirm button
+    confirmBtn.addEventListener('click', async function() {
+        // Show a subtle loading effect on the button
+        confirmBtn.innerHTML = 'Logging out...';
+        confirmBtn.style.opacity = '0.7';
+        confirmBtn.disabled = true;
+
+        try {
+            const response = await fetch('/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Include CSRF token if your application uses it
+                    // 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                credentials: 'same-origin' // Include cookies in the request
+            });
+
+            if (response.redirected) {
+                // If the server redirects, follow the redirect
+                window.location.href = response.url;
+            } else {
+                // Otherwise redirect to login page
+                window.location.href = '/login?logout=success';
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+            window.location.href = '/login'; // Fallback to login on error
         }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      updateTransactionTable(data.transactions);
-      updateBalanceCard(data);
-
-    } catch (error) {
-      console.error('Error fetching transactions:', error);
-    }
-  }
-
-  // Function to update transaction table with formatted numbers
-  function updateTransactionTable(transactions) {
-    const tableBody = document.querySelector('.rank-table');
-    
-    // Clear existing rows except header
-    const header = `
-      <div class="assets-title">Recent Transactions</div>
-      <div class="rank-table-header">
-        <div class="rank-header-cell">Date</div>
-        <div class="rank-header-cell">Amount</div>
-        <div class="rank-header-cell">Status</div>
-      </div>
-    `;
-
-    let transactionsHTML = transactions.map(transaction => `
-      <div class="rank-row transaction-row">
-        <div>${transaction.timestamp}</div>
-        <div class="${transaction.type.toLowerCase()}-amount">
-          ${transaction.type === 'INCOMING' ? '+' : '-'}₦${formatNumberWithCommas(transaction.amount)}
-        </div>
-        <div style="color: ${transaction.status === 'COMPLETED' ? 'var(--accent-green)' : 'var(--accent-red)'}">
-          ${transaction.status}
-        </div>
-      </div>
-    `).join('');
-
-    tableBody.innerHTML = header + transactionsHTML;
-  }
-
-  // Function to update balance card with formatted numbers
-  function updateBalanceCard(data) {
-    const balanceElement = document.querySelector('.Available_balance');
-    if (balanceElement) {
-        // Remove any existing currency symbol before formatting
-        const rawBalance = data.balance.toString().replace(/[₦,]/g, '');
-        const formattedBalance = formatNumberWithCommas(rawBalance);
-        balanceElement.textContent = `₦${formattedBalance}`;
-    }
-}
-
-  // Update user balance with formatting
-  async function updateUserBalance() {
-    try {
-      const response = await fetch('/user/balance', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      // Validate the balance before using it
-      const numericBalance = parseFloat(data.balance);
-      
-      if (isNaN(numericBalance)) {
-        console.error("Server returned non-numeric balance:", data.balance);
-        return "0.00";
-      }
-      
-      // Update balance in localStorage for other pages
-      localStorage.setItem('userBalance', numericBalance);
-      
-      // Dispatch custom event for balance update
-      const balanceUpdateEvent = new CustomEvent('balanceUpdate', {
-        detail: { balance: numericBalance }
-      });
-      window.dispatchEvent(balanceUpdateEvent);
-
-      return numericBalance;
-    } catch (error) {
-      console.error('Error fetching updated balance:', error);
-      return "0.00";
-    }
-  }
-
-  // Update payment processing logic with formatting
-  async function processPayment(paymentData) {
-    try {
-      // ... existing payment processing code ...
-
-      // After successful payment
-      if (response.ok) {
-        const result = await response.json();
-        if (result.status === 'SUCCESS') {
-          // Update balance immediately after successful transaction
-          await updateUserBalance();
-          
-          // Show success message
-          showSuccessMessage('Payment successful!');
-          
-          // Clear QR scanner
-          html5QrCode.clear();
-          
-          // Reset UI state
-          resetScannerUI();
-        }
-      }
-    } catch (error) {
-      console.error('Payment processing error:', error);
-      showErrorMessage('Payment failed: ' + error.message);
-    }
-  }
-
-  // Format balance on balance update event
-  window.addEventListener('balanceUpdate', function(event) {
-    const balanceElements = document.querySelectorAll('.Available_balance, .Avalable_balance');
-    balanceElements.forEach(element => {
-      if (element) {
-        element.textContent = formatNumberWithCommas(event.detail.balance);
-      }
     });
-  });
 
-  // Check for stored balance on page load and format it
-  const storedBalance = localStorage.getItem('userBalance');
-  if (storedBalance) {
-    const balanceElements = document.querySelectorAll('.Available_balance, .Avalable_balance');
-    balanceElements.forEach(element => {
-      if (element) {
-        element.textContent = formatNumberWithCommas(parseFloat(storedBalance));
-      }
+    // Close the modal if the user clicks outside of it
+    window.addEventListener('click', function(event) {
+        if (event.target === logoutModal) {
+            logoutModal.style.display = 'none';
+        }
     });
-  }
 
-  // Apply formatting on initial load
-  formatAllBalanceElements();
-  
-  // Fetch transactions with formatting
-  fetchTransactions();
-  
-  // Refresh transactions every 30 seconds
-  setInterval(fetchTransactions, 30000);
+    // Add keyboard support (Esc to cancel, Enter to confirm)
+    document.addEventListener('keydown', function(e) {
+        if (logoutModal.style.display === 'block') {
+            if (e.key === 'Escape') {
+                logoutModal.style.display = 'none';
+            } else if (e.key === 'Enter') {
+                confirmBtn.click();
+            }
+        }
+    });
+
+    // Connect wallet functionality
+    const connectWalletBtn = document.querySelector('.connect-wallet');
+    const saveBankDetailsBtn = document.getElementById('saveBankDetails');
+    const bankDetailsForm = document.getElementById('bankDetailsForm');
+    // Ensure Bootstrap's Modal is available
+    const connectWalletModal = new bootstrap.Modal(document.getElementById('connectWalletModal'));
+
+    // Show modal when clicking connect wallet button
+    connectWalletBtn.addEventListener('click', function() {
+        connectWalletModal.show();
+    });
+
+    // Handle form submission for connecting wallet
+    saveBankDetailsBtn.addEventListener('click', async function() {
+        const form = document.getElementById('bankDetailsForm');
+        const accountNumber = document.getElementById('accountNumber').value;
+        const bankName = document.getElementById('bankName').value;
+
+        if (!form.checkValidity()) {
+            form.classList.add('was-validated');
+            return;
+        }
+
+        try {
+            saveBankDetailsBtn.disabled = true;
+            saveBankDetailsBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Connecting...';
+
+            const response = await fetch('/user/update-bank-details', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `accountNumber=${accountNumber}&bankName=${bankName}`
+            });
+
+            if (response.ok) {
+                // Show success message
+                connectWalletBtn.innerHTML = '<i class="fas fa-check-circle"></i> Account Connected';
+                connectWalletBtn.classList.add('connected');
+                connectWalletModal.hide();
+                alert('Bank account connected successfully!'); // Consider a more user-friendly toast notification
+            } else {
+                throw new Error('Failed to connect bank account');
+            }
+        } catch (error) {
+            alert('Error connecting bank account: ' + error.message);
+        } finally {
+            saveBankDetailsBtn.disabled = false;
+            saveBankDetailsBtn.innerHTML = 'Connect Account';
+        }
+    });
+
+    // Reset form validation when modal is hidden
+    document.getElementById('connectWalletModal').addEventListener('hidden.bs.modal', function() {
+        bankDetailsForm.classList.remove('was-validated');
+    });
+
+    // Intercept all fetch/ajax calls for session expiration
+    const originalFetch = window.fetch;
+    window.fetch = function() {
+        return originalFetch.apply(this, arguments)
+            .then(response => {
+                if (response.status === 401) {
+                    // Check if session expired (assuming server sends a custom header)
+                    const sessionExpired = response.headers.get('X-Session-Expired');
+                    if (sessionExpired) {
+                        window.location.href = '/login';
+                    }
+                }
+                return response;
+            });
+    };
+
+    // Listen for custom balance update event
+    window.addEventListener('balanceUpdate', function(event) {
+        const balanceElements = document.querySelectorAll('.Available_balance');
+        balanceElements.forEach(element => {
+            if (element) {
+                element.textContent = `₦${formatNumberWithCommas(event.detail.balance)}`;
+            }
+        });
+    });
+
+    // Check for stored balance on page load and format it
+    const storedBalance = localStorage.getItem('userBalance');
+    if (storedBalance) {
+        const balanceElements = document.querySelectorAll('.Available_balance');
+        balanceElements.forEach(element => {
+            if (element) {
+                element.textContent = `₦${formatNumberWithCommas(parseFloat(storedBalance))}`;
+            }
+        });
+    }
+
+    // Handle loading overlay for initial page load
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const content = document.querySelector('.content');
+
+    // Show loading screen immediately
+    loadingOverlay.style.display = 'flex';
+
+    // Wait for everything to load
+    window.addEventListener('load', () => {
+        // Small delay to ensure smooth transition
+        setTimeout(() => {
+            // Hide loading screen
+            loadingOverlay.classList.add('hidden');
+
+            // Show content
+            content.classList.add('visible');
+
+            // Clean up loading overlay after animation
+            setTimeout(() => {
+                loadingOverlay.style.display = 'none';
+            }, 500); // Match the CSS transition duration
+        }, 300);
+    });
 });
 
-function fixCurrentBalanceDisplay() {
-  console.log("Fixing balance display");
-  
-  // The correct class from your HTML snippet is "Available_balance"
-  // But your JavaScript had "Avalable_balance" in some places
-  const balanceElements = document.querySelectorAll('.Available_balance');
-  
-  balanceElements.forEach(element => {
-    console.log("Found balance element:", element);
-    console.log("Current text content:", element.textContent);
-    
-    // Get the raw value (removing any non-numeric characters except decimal point)
-    let rawValue = element.textContent.replace(/[^0-9.]/g, '');
-    console.log("Raw value after cleanup:", rawValue);
-    
-    // Check if it's a valid number
-    if (rawValue && !isNaN(parseFloat(rawValue))) {
-      element.textContent = formatNumberWithCommas(rawValue);
-    } else {
-      // If not valid, fetch from server or set to default
-      console.log("Invalid balance, setting default");
-      updateUserBalance().then(balance => {
-        if (balance && !isNaN(parseFloat(balance))) {
-          element.textContent = formatNumberWithCommas(balance);
-        } else {
-          element.textContent = "0.00";
-        }
-      }).catch(error => {
-        console.error("Error updating balance:", error);
-        element.textContent = "0.00";
-      });
+// --- Chart and Data Fetching Functions ---
+
+/**
+ * Initializes the transaction chart using Chart.js.
+ * Fetches initial data and sets up periodic updates.
+ */
+async function initializeTransactionChart() {
+    try {
+        const chartData = await fetchChartData();
+
+        const ctx = document.getElementById('transactionsChart').getContext('2d');
+        const transactionsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Transaction Volume',
+                    data: chartData.data,
+                    backgroundColor: 'rgba(58, 128, 233, 0.1)',
+                    borderColor: '#3a80e9',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `₦${formatNumberWithCommas(context.raw)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            display: true,
+                            color: 'rgba(255, 255, 255, 0.05)'
+                        },
+                        ticks: {
+                            color: '#a0a0a0',
+                            callback: function(value) {
+                                return '₦' + formatNumberWithCommas(value);
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#a0a0a0'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Update chart periodically
+        setInterval(async () => {
+            const newData = await fetchChartData();
+            transactionsChart.data.labels = newData.labels;
+            transactionsChart.data.datasets[0].data = newData.data;
+            transactionsChart.update();
+        }, 300000); // Update every 5 minutes
+    } catch (error) {
+        console.error('Error initializing transaction chart:', error);
     }
-  });
 }
+
+/**
+ * Fetches transaction chart data from the server.
+ * @returns {Promise<Object>} A promise that resolves to the chart data (labels and data).
+ */
+async function fetchChartData() {
+    try {
+        const response = await fetch('/user/transaction-chart-data', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching chart data:', error);
+        return {
+            labels: [],
+            data: []
+        }; // Return empty data on error
+    }
+}
+
+/**
+ * Fetches and displays recent transactions and updates the balance card.
+ */
+async function fetchTransactions() {
+    try {
+        const response = await fetch('/user/transactions?limit=5', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        updateTransactionTable(data.transactions);
+        updateBalanceCard(data);
+    } catch (error) {
+        console.error('Error fetching transactions:', error);
+    }
+}
+
+/**
+ * Updates the transaction table with new transaction data, including animations.
+ * @param {Array<Object>} transactions - An array of transaction objects.
+ */
+function updateTransactionTable(transactions) {
+    const tableBody = document.querySelector('.rank-table');
+
+    // Clear existing rows except header for a clean update
+    const headerHtml = `
+        <div class="assets-title">Recent Transactions</div>
+        <div class="rank-table-header">
+            <div class="rank-header-cell">Date</div>
+            <div class="rank-header-cell">Amount</div>
+            <div class="rank-header-cell">Status</div>
+        </div>
+    `;
+
+    // Map transactions to HTML, formatting amounts and colors
+    const transactionsHtml = transactions.map(transaction => `
+        <div class="rank-row transaction-row">
+            <div>${transaction.timestamp}</div>
+            <div class="${transaction.type.toLowerCase()}-amount">
+                ${transaction.type === 'INCOMING' ? '+' : '-'}₦${formatNumberWithCommas(transaction.amount)}
+            </div>
+            <div style="color: ${transaction.status === 'COMPLETED' ? 'var(--accent-green)' : 'var(--accent-red)'}">
+                ${transaction.status}
+            </div>
+        </div>
+    `).join('');
+
+    tableBody.innerHTML = headerHtml + transactionsHtml;
+
+    // Re-attach event listeners to new transaction rows if needed for detail view
+    document.querySelectorAll('.transaction-row').forEach(row => {
+        row.addEventListener('click', function() {
+            console.log('Transaction details:', this.children[0].textContent, this.children[1].textContent);
+        });
+    });
+}
+
+/**
+ * Updates the transaction table with a single new transaction, applying animations.
+ * @param {Object} newTransaction - The new transaction object to add.
+ */
 function updateTransactionTableWithAnimation(newTransaction) {
     const tableBody = document.querySelector('.rank-table');
     const rows = tableBody.querySelectorAll('.transaction-row');
-    
-    // Remove the last row with animation
+
+    // Remove the last row with animation if there are 5 or more rows
     if (rows.length >= 5) {
         const lastRow = rows[rows.length - 1];
-        lastRow.style.animation = 'slideOutRight 0.5s';
+        lastRow.style.animation = 'slideOutRight 0.5s forwards'; // 'forwards' keeps the end state
         setTimeout(() => lastRow.remove(), 500);
     }
-    
+
     // Create and add new row with animation
     const newRow = document.createElement('div');
     newRow.className = 'rank-row transaction-row';
     newRow.style.animation = 'slideInLeft 0.5s';
-    
+
     newRow.innerHTML = `
         <div>${newTransaction.timestamp}</div>
         <div class="${newTransaction.type.toLowerCase()}-amount">
@@ -885,7 +897,7 @@ function updateTransactionTableWithAnimation(newTransaction) {
             ${newTransaction.status}
         </div>
     `;
-    
+
     // Insert new row at the top (after the header)
     const header = tableBody.querySelector('.rank-table-header');
     header.insertAdjacentElement('afterend', newRow);
@@ -895,8 +907,178 @@ function updateTransactionTableWithAnimation(newTransaction) {
         showTransactionNotification(newTransaction);
     }
 }
+
+/**
+ * Updates the balance display on the balance card.
+ * @param {Object} data - Object containing the balance.
+ */
+function updateBalanceCard(data) {
+    const balanceElement = document.querySelector('.Available_balance');
+    if (balanceElement && data.balance !== undefined) {
+        const rawBalance = String(data.balance).replace(/[₦,]/g, ''); // Ensure string and clean
+        const formattedBalance = formatNumberWithCommas(rawBalance);
+        balanceElement.textContent = `₦${formattedBalance}`;
+    }
+}
+
+/**
+ * Fetches and updates the user's balance.
+ * Stores the balance in localStorage and dispatches a custom event.
+ * @returns {Promise<number>} A promise that resolves to the numeric balance.
+ */
+async function updateUserBalance() {
+    try {
+        const response = await fetch('/user/balance', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const numericBalance = parseFloat(data.balance);
+
+        if (isNaN(numericBalance)) {
+            console.error("Server returned non-numeric balance:", data.balance);
+            return 0.00; // Return 0 for invalid balance
+        }
+
+        localStorage.setItem('userBalance', numericBalance); // Update balance in localStorage
+        // Dispatch custom event for balance update
+        const balanceUpdateEvent = new CustomEvent('balanceUpdate', {
+            detail: {
+                balance: numericBalance
+            }
+        });
+        window.dispatchEvent(balanceUpdateEvent);
+
+        return numericBalance;
+    } catch (error) {
+        console.error('Error fetching updated balance:', error);
+        return 0.00; // Return 0 on error
+    }
+}
+
+/**
+ * Applies number formatting to all elements with balance-related classes.
+ */
+function formatAllBalanceElements() {
+    // Select both inconsistent class names
+    const balanceElements = document.querySelectorAll('.Available_balance');
+
+    balanceElements.forEach(element => {
+        if (element.textContent) {
+            // Get the raw value, removing currency symbols and commas
+            let rawValue = element.textContent.replace(/[₦,]/g, '');
+            if (!isNaN(parseFloat(rawValue))) {
+                element.textContent = `₦${formatNumberWithCommas(rawValue)}`;
+            } else {
+                // If initial content is not a valid number, try fetching from server
+                updateUserBalance(); // This will trigger a balanceUpdate event
+            }
+        }
+    });
+}
+
+
+/**
+ * Handles payment processing (placeholder for actual implementation).
+ * Updates balance and shows notifications after successful payment.
+ * @param {Object} paymentData - Data related to the payment.
+ */
+async function processPayment(paymentData) {
+    // ... existing payment processing code ...
+    // This function seems to be incomplete in the provided snippet.
+    // Assuming 'response' and 'result' are defined from an API call
+    try {
+        // Example: Simulating a fetch call
+        const response = await fetch('/api/process-payment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(paymentData)
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.status === 'SUCCESS') {
+            await updateUserBalance(); // Update balance immediately after successful transaction
+            showSuccessMessage('Payment successful!'); // Placeholder for success message
+            // html5QrCode.clear(); // If QR scanner is used
+            // resetScannerUI(); // If scanner UI needs resetting
+        } else {
+            throw new Error(result.message || 'Payment failed');
+        }
+    } catch (error) {
+        console.error('Payment processing error:', error);
+        showErrorMessage('Payment failed: ' + error.message); // Placeholder for error message
+    }
+}
+
+// --- WebSocket Functionality ---
+
+/**
+ * Initializes WebSocket connection for real-time transaction updates.
+ * Subscribes to personal transaction topics and handles incoming messages.
+ */
+function initializeWebSocket() {
+    // Ensure SockJS and Stomp are loaded before calling this function
+    if (typeof SockJS === 'undefined' || typeof Stomp === 'undefined') {
+        console.error('SockJS or Stomp.js libraries are not loaded. WebSocket cannot be initialized.');
+        return;
+    }
+
+    const socket = new SockJS('/ws');
+    const stompClient = Stomp.over(socket);
+
+    // Get user ID from meta tag
+    const userIdMeta = document.querySelector('meta[name="user-id"]');
+    if (!userIdMeta) {
+        console.error('Meta tag with name "user-id" not found. Cannot subscribe to user-specific transactions.');
+        return;
+    }
+    const userId = userIdMeta.content;
+
+    stompClient.connect({}, function(frame) {
+        console.log('Connected to WebSocket:', frame);
+
+        // Subscribe to personal transaction updates
+        stompClient.subscribe('/topic/transactions/' + userId, function(message) {
+            try {
+                const transaction = JSON.parse(message.body);
+                updateTransactionTableWithAnimation(transaction);
+
+                // Show notification for incoming transactions and update balance
+                if (transaction.type === 'INCOMING') {
+                    showTransactionNotification(transaction);
+                    updateUserBalance(); // Fetch latest balance after incoming transaction
+                }
+            } catch (e) {
+                console.error('Error parsing WebSocket message:', e, message.body);
+            }
+        });
+    }, function(error) {
+        console.error('WebSocket connection error:', error);
+        // Attempt to reconnect after a delay
+        setTimeout(initializeWebSocket, 5000);
+    });
+
+    return stompClient;
+}
+
+
+// --- Notification and UI Helper Functions ---
+
+/**
+ * Displays a transaction notification (e.g., for incoming funds).
+ * @param {Object} transaction - The transaction object to display.
+ */
 function showTransactionNotification(transaction) {
-    // Create notification container if it doesn't exist
     let notificationContainer = document.getElementById('notification-container');
     if (!notificationContainer) {
         notificationContainer = document.createElement('div');
@@ -904,7 +1086,6 @@ function showTransactionNotification(transaction) {
         document.body.appendChild(notificationContainer);
     }
 
-    // Create notification element
     const notification = document.createElement('div');
     notification.className = 'transaction-notification';
     notification.innerHTML = `
@@ -918,49 +1099,65 @@ function showTransactionNotification(transaction) {
         </div>
     `;
 
-    // Add to container
     notificationContainer.appendChild(notification);
 
     // Add close button functionality
     const closeBtn = notification.querySelector('.notification-close');
-    closeBtn.onclick = () => notification.remove();
+    closeBtn.onclick = () => {
+        notification.style.animation = 'slideOutRight 0.5s forwards';
+        setTimeout(() => notification.remove(), 500);
+    };
 
     // Auto remove after 5 seconds
     setTimeout(() => {
-        notification.style.animation = 'slideOutRight 0.5s';
-        setTimeout(() => notification.remove(), 500);
+        if (notification.parentNode) { // Check if element still exists before trying to animate/remove
+            notification.style.animation = 'slideOutRight 0.5s forwards';
+            setTimeout(() => notification.remove(), 500);
+        }
     }, 5000);
 }
-// Add this after your existing WebSocket initialization code
-function initializeWebSocket() {
-    const socket = new SockJS('/ws');
-    const stompClient = Stomp.over(socket);
-    const userId = document.querySelector('meta[name="user-id"]').content;
 
-    stompClient.connect({}, function(frame) {
-        console.log('Connected to WebSocket');
-        
-        // Subscribe to personal transaction updates
-        stompClient.subscribe('/topic/transactions/' + userId, function(message) {
-            const transaction = JSON.parse(message.body);
-            
-            // Update transaction table
-            updateTransactionTableWithAnimation(transaction);
-            
-            // Show notification for incoming transactions
-            if (transaction.type === 'INCOMING') {
-                showTransactionNotification(transaction);
-                updateUserBalance();
-            }
-        });
-    }, function(error) {
-        console.error('WebSocket connection error:', error);
-        // Try to reconnect after 5 seconds
-        setTimeout(initializeWebSocket, 5000);
-    });
-
-    return stompClient;
+/**
+ * Placeholder for showing a success message (e.g., a toast or alert).
+ * @param {string} message - The success message to display.
+ */
+function showSuccessMessage(message) {
+    console.log("SUCCESS:", message);
+    // In a real application, you'd use a more sophisticated notification system (e.g., Toastify, SweetAlert)
+    // alert(message);
 }
-  </script>
+
+/**
+ * Placeholder for showing an error message (e.g., a toast or alert).
+ * @param {string} message - The error message to display.
+ */
+function showErrorMessage(message) {
+    console.error("ERROR:", message);
+    // In a real application, you'd use a more sophisticated error display
+    // alert(message);
+}
+
+/**
+ * This function seems redundant given `formatAllBalanceElements` and `updateUserBalance`.
+ * It attempts to fix current balance display by re-formatting and fetching if invalid.
+ * It's generally better to have a single source of truth for balance updates.
+ */
+function fixCurrentBalanceDisplay() {
+    console.log("Attempting to fix balance display for consistency.");
+
+    const balanceElements = document.querySelectorAll('.Available_balance');
+
+    balanceElements.forEach(element => {
+        let rawValue = element.textContent.replace(/[^0-9.]/g, '');
+
+        if (rawValue && !isNaN(parseFloat(rawValue))) {
+            element.textContent = `₦${formatNumberWithCommas(rawValue)}`;
+        } else {
+            console.log("Invalid initial balance detected, fetching latest balance.");
+            updateUserBalance(); // This will trigger a 'balanceUpdate' event
+        }
+    });
+}
+</script>
 </body>
 </html>

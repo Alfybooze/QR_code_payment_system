@@ -75,9 +75,9 @@ public class CurrencyService {
                             return;
                         }
                         // Extract target currency (e.g., "usd" from "ngn_usd")
-                        String targetCurrency = key.replace(srcCurrencyFinal + "_", "").toUpperCase();
-                        rates.put(targetCurrency, rate); // Store as "USD", "GBP", etc.
-                        log.info("Rate for {}: {}", targetCurrency, rate);
+                        
+                        rates.put(key.toLowerCase(), rate); // Store as "USD", "GBP", etc.
+                        log.info("Rate for {}: {}", key, rate);
                     } catch (Exception e) {
                         log.error("Error processing rate for {}: {}", key, e.getMessage());
                     }
@@ -107,12 +107,12 @@ public class CurrencyService {
 
      private void addFallbackRates(Map<String, Double> rates) {
         // Update fallback rates to be in correct format (how much foreign currency equals 1 NGN)
-        rates.put("USD", 0.000704);  // 1 NGN = 0.000704 USD
-        rates.put("EUR", 0.000654);  // 1 NGN = 0.000654 EUR
-        rates.put("GBP", 0.000548);  // 1 NGN = 0.000548 GBP
-        rates.put("BTC", 0.0000000150); // 1 NGN = 0.0000000150 BTC
-        rates.put("ETH", 0.000000234);  // 1 NGN = 0.000000234 ETH
-        rates.put("NGN", 1.0);          // 1 NGN = 1 NGN
+        rates.put("ngn_usd", 0.000704);  // 1 NGN = 0.000704 USD
+        rates.put("ngn_eur", 0.000654);  // 1 NGN = 0.000654 EUR
+        rates.put("ngn_gbp", 0.000548);  // 1 NGN = 0.000548 GBP
+        rates.put("ngn_btc", 0.0000000150); // 1 NGN = 0.0000000150 BTC
+        rates.put("ngn_eth", 0.000000234);  // 1 NGN = 0.000000234 ETH
+        rates.put("ngn_ngn", 1.0);          // 1 NGN = 1 NGN
 
         // Add change percentages
         addChangeRates(rates);

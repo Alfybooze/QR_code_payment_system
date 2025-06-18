@@ -583,3 +583,97 @@
     color: var(--text-secondary);
     font-size: 12px;
 }
+
+#notification-container {
+    position: fixed;
+    top: -100%; /* Start off-screen */
+    right: 20px;
+    z-index: 9999;
+    max-width: 350px;
+    transition: top 0.5s ease-in-out;
+}
+
+.transaction-notification {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin-bottom: 10px;
+    animation: slideInTop 0.5s forwards;
+    overflow: hidden;
+}
+
+.transaction-notification.closing {
+    animation: slideOutTop 0.5s forwards;
+}
+
+@keyframes slideInTop {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutTop {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+}
+
+/* Update notification positioning */
+.notification-enter {
+    top: 20px; /* Final position when notification appears */
+}
+
+/* Rest of your notification styles remain the same */
+.notification-content {
+    padding: 15px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.notification-text {
+    flex: 1;
+}
+
+.notification-text strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #2c3e50;
+}
+
+.notification-text p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.notification-text small {
+    display: block;
+    color: #999;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0;
+    transition: color 0.3s ease;
+}
+
+.notification-close:hover {
+    color: #666;
+}

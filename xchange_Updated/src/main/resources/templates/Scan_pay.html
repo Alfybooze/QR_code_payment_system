@@ -215,492 +215,403 @@
     </div>
 </div>
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Get user data from meta tags
-      const userId = document.querySelector('meta[name="user-id"]').content;
-      const username = document.querySelector('meta[name="username"]').content;
-      
-      // Elements for QR scanner
-      const reader = document.getElementById('reader');
-      const scannerOverlay = document.getElementById('scanner-overlay');
-      const startScanBtn = document.getElementById('start-scan-btn');
-      const toggleCameraBtn = document.getElementById('toggle-camera-btn');
-      const uploadQrBtn = document.getElementById('upload-qr-btn');
-      const statusMessage = document.getElementById('status-message');
-      const successMessage = document.getElementById('success-message');
-      const errorMessage = document.getElementById('error-message');
-      
-      // Confirmation overlay elements
-      const confirmationOverlay = document.getElementById('confirmation-overlay');
-      const recipientName = document.getElementById('recipient-name');
-      const recipientId = document.getElementById('recipient-id');
-      const paymentAmount = document.getElementById('payment-amount');
-      const requestTime = document.getElementById('request-time');
-      const cancelPaymentBtn = document.getElementById('cancel-payment-btn');
-      const confirmPaymentBtn = document.getElementById('confirm-payment-btn');
-      
-      // Sidebar elements
-      const sidebar = document.getElementById('sidebar');
-      const sidebarToggle = document.getElementById('sidebar-toggle');
-      const closeSidebarBtn = document.querySelector('.close-sidebar');
-      const overlay = document.getElementById('overlay');
-      
-      // Currency symbols mapping
-      const currencySymbols = {
-          NGN: '₦',
-          USD: '$',
-          BTC: '₿',
-          ETH: 'Ξ'
-      };
-      
-      // QR Scanner instance
-      let html5QrCode;
-      let cameraId;
-      let cameras = [];
-      let currentCameraIndex = 0;
-      
-      // Format amount based on currency
-      function formatAmount(amount, currency) {
-          switch(currency) {
-              case 'BTC':
-              case 'ETH':
-                  return amount.toFixed(8);
-              default:
-                  return amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-          }
-      }
-      
-      // Initialize QR Scanner
-      function initScanner() {
-          html5QrCode = new Html5Qrcode("reader");
-          
-          // Add QR code success callback
-          const qrCodeSuccessCallback = (decodedText, decodedResult) => {
-              try {
-                  // Parse the QR code content
-                  const paymentData = JSON.parse(decodedText);
-                  
-                  // Validate payment request type and required fields
-                  if (paymentData.type !== "PAYMENT_REQUEST") {
-                      throw new Error('Invalid QR code type. Expected: PAYMENT_REQUEST');
-                  }
-          
-                  // Validate required fields
-                  if (!paymentData.username || !paymentData.userId || !paymentData.totalAmount) {
-                      throw new Error('Missing required payment information');
-                  }
-                  
-                  // Check if QR code has expired
-                  if (paymentData.expirationTime) {
-                      const expirationTime = new Date(paymentData.expirationTime);
-                      const currentTime = new Date();
-                      
-                      if (currentTime > expirationTime) {
-                          throw new Error('This QR code has expired. Please request a new one.');
-                      }
-                  }
-          
-                  // Stop scanning
-                  html5QrCode.stop();
-                  
-                  // Hide scanner overlay
-                  scannerOverlay.style.display = 'none';
-                  
-                  // Format the amount based on currency
-                  const formattedAmount = new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: paymentData.currency || 'NGN' // Use QR code currency or fallback to NGN
-                }).format(paymentData.totalAmount);
-                  
-                  // Update confirmation overlay with payment details
-                  recipientName.textContent = paymentData.username;
-                  recipientId.textContent = paymentData.userId;
-                  paymentAmount.textContent = formattedAmount;
-                  requestTime.textContent = new Date(paymentData.timestamp).toLocaleString();
-                  
-                  // Show confirmation overlay
-                  confirmationOverlay.style.display = 'flex';
-                  
-                  //restart the scanner after canceling
-                cancelPaymentBtn.addEventListener('click', () => {
-                  confirmationOverlay.style.display = 'none';
-                  // Show scanner overlay with start button after canceling
-                  scannerOverlay.style.display = 'flex';
-                  // Reset status and error messages
-                  statusMessage.textContent = 'Position the QR code in front of your camera';
-                  errorMessage.style.display = 'none';
-                  successMessage.style.display = 'none';
-                });
-                  
-                  confirmPaymentBtn.addEventListener('click', async () => {
-                      try {
-                          // Encode the entire QR data as base64 to send to backend
-                          const base64Data = btoa(decodedText);
-                          
-                          // Send payment request to backend
-                          const response = await fetch('/user/scan-and-pay', {
-                              method: 'POST',
-                              headers: {
-                                  'Content-Type': 'text/plain', // Send as plain text (base64)
-                              },
-                              body: base64Data // Send the original QR data as base64
-                          });
-          
-                         if (response.ok) {
-    const result = await response.json();
-    
-    // Update success modal with transaction details
-    document.getElementById('successAmount').textContent = paymentAmount.textContent;
-    document.getElementById('successRecipient').textContent = recipientName.textContent;
-    document.getElementById('successTransactionId').textContent = result.transactionId || 'N/A';
-    
-    // Hide confirmation overlay
-    confirmationOverlay.style.display = 'none';
-    
-    // Show success modal
+  document.addEventListener('DOMContentLoaded', function() {
+    // --- UTILITY FUNCTIONS ---
+    // Utility to format amount based on currency
+    const formatAmount = (amount, currency) => {
+        const options = {
+            style: 'currency',
+            currency: currency || 'NGN', // Default to NGN if not specified
+        };
+        // Handle cryptocurrencies with higher precision
+        if (['BTC', 'ETH'].includes(currency)) {
+            options.minimumFractionDigits = 4;
+            options.maximumFractionDigits = 8;
+        } else {
+            options.minimumFractionDigits = 2;
+            options.maximumFractionDigits = 2;
+        }
+        return new Intl.NumberFormat('en-US', options).format(amount);
+    };
+
+    // --- DOM ELEMENT SELECTORS ---
+    // User data from meta tags
+    const userId = document.querySelector('meta[name="user-id"]')?.content;
+    const username = document.querySelector('meta[name="username"]')?.content;
+
+    // QR Scanner elements
+    const reader = document.getElementById('reader');
+    const scannerOverlay = document.getElementById('scanner-overlay');
+    const startScanBtn = document.getElementById('start-scan-btn');
+    const toggleCameraBtn = document.getElementById('toggle-camera-btn');
+    const uploadQrBtn = document.getElementById('upload-qr-btn');
+    const statusMessage = document.getElementById('status-message');
+    const successMessage = document.getElementById('success-message');
+    const errorMessage = document.getElementById('error-message');
+
+    // Confirmation overlay elements
+    const confirmationOverlay = document.getElementById('confirmation-overlay');
+    const recipientName = document.getElementById('recipient-name');
+    const recipientId = document.getElementById('recipient-id');
+    const paymentAmount = document.getElementById('payment-amount');
+    const requestTime = document.getElementById('request-time');
+    const cancelPaymentBtn = document.getElementById('cancel-payment-btn');
+    const confirmPaymentBtn = document.getElementById('confirm-payment-btn');
+
+    // Success Modal elements
     const successModal = document.getElementById('successModal');
-    successModal.style.display = 'flex';
-    
- if (html5QrCode && html5QrCode.isScanning) {
-        await html5QrCode.stop();
-    }
-    
-    // Add click handler for close button
-    document.getElementById('closeSuccessModal').onclick = () => {
-        successModal.style.display = 'none';
-        // Reset scanner UI
+    const closeSuccessModal = document.getElementById('closeSuccessModal');
+
+    // Sidebar elements
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const closeSidebarBtn = document.querySelector('.close-sidebar');
+    const overlay = document.getElementById('overlay');
+
+    // Logout Modal elements
+    const logoutBtn = document.querySelector('.logout span');
+    const logoutModal = document.getElementById('logoutModal');
+    const cancelLogoutBtn = document.getElementById('cancelLogout');
+    const confirmLogoutBtn = document.getElementById('confirmLogout');
+
+
+    // --- STATE MANAGEMENT ---
+    let html5QrCode;
+    let cameras = [];
+    let currentCameraIndex = 0;
+    let paymentDataStore = null; // Store decoded payment data temporarily
+
+    // --- FUNCTION DEFINITIONS ---
+
+    /**
+     * Resets the UI to its initial state, hiding overlays and messages.
+     */
+    function resetUI() {
         scannerOverlay.style.display = 'flex';
         startScanBtn.style.display = 'block';
+        confirmationOverlay.style.display = 'none';
+        successModal.style.display = 'none';
+
         statusMessage.textContent = 'Position the QR code in front of your camera';
         errorMessage.style.display = 'none';
         successMessage.style.display = 'none';
-    };
-    
+    }
 
-    // Optional: Add click outside to close
-    successModal.onclick = (e) => {
-        if (e.target === successModal) {
-            successModal.style.display = 'none';
-            // Reset scanner UI
-            scannerOverlay.style.display = 'flex';
-            startScanBtn.style.display = 'block';
-            statusMessage.textContent = 'Position the QR code in front of your camera';
-            errorMessage.style.display = 'none';
-            successMessage.style.display = 'none';
+    /**
+     * Stops the QR scanner if it's currently active.
+     * @returns {Promise<void>}
+     */
+    async function stopScanner() {
+        if (html5QrCode && html5QrCode.isScanning) {
+            try {
+                await html5QrCode.stop();
+            } catch (err) {
+                console.error("Error stopping the scanner:", err);
+                // Even if stopping fails, we proceed with UI changes.
+            }
         }
-    };
     }
-  else {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Payment failed');
-}
-                      } catch (error) {
-                          errorMessage.textContent = error.message || 'Payment failed. Please try again.';
-                          errorMessage.style.display = 'block';
-                          confirmationOverlay.style.display = 'none';
-                      }
-                  });
-          
-              } catch (error) {
-                  console.error('QR code processing error:', error);
-                  errorMessage.textContent = error.message || 'Invalid QR code format';
-                  errorMessage.style.display = 'block';
-                  // Don't hide scanner overlay on error
-                  scannerOverlay.style.display = 'flex';
-              }
-          };
-  
-          const config = {
-              fps: 10,
-              qrbox: { width: 250, height: 250 },
-              aspectRatio: 1.0
-          };
-  
-          // Start Scanner button click handler
-          startScanBtn.addEventListener('click', startScanner);
-  
-          function startScanner() {
-              scannerOverlay.style.display = 'none';
-              html5QrCode.start(
-                  { facingMode: "environment" },
-                  config,
-                  qrCodeSuccessCallback
-              ).catch((err) => {
-                  console.error("Error starting scanner:", err);
-                  errorMessage.textContent = "Failed to start scanner. Please check camera permissions.";
-                  errorMessage.style.display = "block";
-                  scannerOverlay.style.display = 'flex';
-              });
-          }
-  
-          // Switch camera button handler
-          toggleCameraBtn.addEventListener('click', () => {
-              currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
-              html5QrCode.stop().then(() => {
-                  startScanner();
-              });
-          });
-  
-          // Initialize camera detection
-          Html5Qrcode.getCameras().then((devices) => {
-              if (devices && devices.length) {
-                  cameras = devices;
-                  cameraId = devices[0].id;
-                  toggleCameraBtn.disabled = devices.length <= 1;
-              } else {
-                  errorMessage.textContent = "No camera detected";
-                  errorMessage.style.display = "block";
-                  toggleCameraBtn.disabled = true;
-              }
-          });
-      }
-  
-  // Inside the uploadQrBtn event listener, modifies the code to check scanner status first:
 
-  uploadQrBtn.addEventListener('click', function() {
-  // Create a hidden file input
-  const fileInput = document.createElement('input');
-  fileInput.type = 'file';
-  fileInput.accept = 'image/*';
-  fileInput.style.display = 'none';
-  document.body.appendChild(fileInput);
+    /**
+     * Processes the decoded QR code text.
+     * @param {string} decodedText - The JSON string from the QR code.
+     */
+    async function processDecodedText(decodedText) {
+        await stopScanner();
 
-  // Trigger file selection
-  fileInput.click();
+        try {
+            const paymentData = JSON.parse(decodedText);
 
-  // Handle file selection
-  fileInput.addEventListener('change', function() {
-    if (fileInput.files && fileInput.files[0]) {
-      const imageFile = fileInput.files[0];
-      
-      // Show loading state
-      statusMessage.textContent = 'Processing image...';
-      errorMessage.style.display = 'none';
-      
-      // Check if scanner is actively running before trying to stop it
-      if (html5QrCode && html5QrCode.isScanning) {
-        html5QrCode.stop().then(() => {
-          processQRImage(imageFile);
-        }).catch((err) => {
-          console.error("Error stopping scanner:", err);
-          processQRImage(imageFile);
-        });
-      } else {
-        // Process the image directly without stopping scanner
-        processQRImage(imageFile);
-      }
+            // --- Validation ---
+            if (paymentData.type !== "PAYMENT_REQUEST" || !paymentData.username || !paymentData.userId || !paymentData.totalAmount) {
+                throw new Error('Invalid or incomplete payment QR code.');
+            }
+
+            if (paymentData.expirationTime && new Date() > new Date(paymentData.expirationTime)) {
+                throw new Error('This QR code has expired. Please request a new one.');
+            }
+
+            // Store data and show confirmation
+            paymentDataStore = paymentData;
+            showConfirmationOverlay();
+
+        } catch (error) {
+            console.error('QR code processing error:', error);
+            errorMessage.textContent = error.message || 'Failed to process QR code.';
+            errorMessage.style.display = 'block';
+            resetUI(); // Go back to the initial screen on error
+        }
     }
-    // Clean up
-    document.body.removeChild(fileInput);
-  });
-});
-      
-      // Process QR code from uploaded image
-      function processQRImage(imageFile) {
-          html5QrCode.scanFile(imageFile, true)
-              .then(decodedText => {
-                  try {
-                      // Parse the QR code content
-                      const paymentData = JSON.parse(decodedText);
-                      
-                      // Validate payment request type and required fields
-                      if (paymentData.type !== "PAYMENT_REQUEST") {
-                          throw new Error('Invalid QR code type. Expected: PAYMENT_REQUEST');
-                      }
-              
-                      // Validate required fields
-                      if (!paymentData.username || !paymentData.userId || !paymentData.totalAmount) {
-                          throw new Error('Missing required payment information');
-                      }
-                      
-                      // Check if QR code has expired
-                      if (paymentData.expirationTime) {
-                          const expirationTime = new Date(paymentData.expirationTime);
-                          const currentTime = new Date();
-                          
-                          if (currentTime > expirationTime) {
-                              throw new Error('This QR code has expired. Please request a new one.');
-                          }
-                      }
-                      
-                      // Format the amount based on currency
-                      const formattedAmount = new Intl.NumberFormat('en-US', {
-                        style: 'currency',
-                        currency: paymentData.currency || 'NGN' // Use QR code currency or fallback to NGN
-                    }).format(paymentData.totalAmount);
-                      
-                      // Update confirmation overlay with payment details
-                      recipientName.textContent = paymentData.username;
-                      recipientId.textContent = paymentData.userId;
-                      paymentAmount.textContent = formattedAmount;
-                      requestTime.textContent = new Date(paymentData.timestamp).toLocaleString();
-                      
-                      // Hide scanner overlay and show confirmation
-                      scannerOverlay.style.display = 'none';
-                      confirmationOverlay.style.display = 'flex';
-                      statusMessage.textContent = 'Position the QR code in front of your camera';
-                      
-                      // Remove any previous event listeners by cloning elements
-                      const oldCancelBtn = cancelPaymentBtn;
-                      const newCancelBtn = oldCancelBtn.cloneNode(true);
-                      oldCancelBtn.parentNode.replaceChild(newCancelBtn, oldCancelBtn);
-                      
-                      const oldConfirmBtn = confirmPaymentBtn;
-                      const newConfirmBtn = oldConfirmBtn.cloneNode(true);
-                      oldConfirmBtn.parentNode.replaceChild(newConfirmBtn, oldConfirmBtn);
-                      
-                      // Add event listeners for confirmation buttons
-                      newCancelBtn.addEventListener('click', () => {
-                        confirmationOverlay.style.display = 'none';
-                        // Show scanner overlay with start button after canceling
-                        scannerOverlay.style.display = 'flex';
-                        // Reset status and error messages
-                        statusMessage.textContent = 'Position the QR code in front of your camera';
-                        errorMessage.style.display = 'none';
-                        successMessage.style.display = 'none';
-                    });
-                      
-                      newConfirmBtn.addEventListener('click', async () => {
-                          try {
-                              // Encode the entire QR data as base64 to send to backend
-                              const base64Data = btoa(decodedText);
-                              
-                              // Send payment request to backend
-                              const response = await fetch('/user/scan-and-pay', {
-                                  method: 'POST',
-                                  headers: {
-                                      'Content-Type': 'text/plain', // Send as plain text (base64)
-                                  },
-                                  body: base64Data // Send the original QR data as base64
-                              });
-              
-                              if (response.ok) {
-                                  const result = await response.json();
-                                  successMessage.textContent = 'Payment successful!';
-                                  successMessage.style.display = 'block';
-                                  confirmationOverlay.style.display = 'none';
-                                  setTimeout(() => {
-                                      window.location.href = '/dashboard';
-                                  }, 2000);
-                              } else {
-                                  const errorData = await response.json();
-                                  throw new Error(errorData.error || 'Payment failed');
-                              }
-                          } catch (error) {
-                              errorMessage.textContent = error.message || 'Payment failed. Please try again.';
-                              errorMessage.style.display = 'block';
-                              confirmationOverlay.style.display = 'none';
-                          }
-                      });
-                  } catch (error) {
-                      console.error('QR code processing error:', error);
-                      errorMessage.textContent = error.message || 'Invalid QR code format';
-                      errorMessage.style.display = 'block';
-                      statusMessage.textContent = 'Position the QR code in front of your camera';
-                  }
-              })
-              .catch(err => {
-                  console.error("Error scanning file:", err);
-                  errorMessage.textContent = "Could not read QR code from image. Please try another image or use the camera.";
-                  errorMessage.style.display = 'block';
-                  statusMessage.textContent = 'Position the QR code in front of your camera';
-              });
-      }
-  
-      // Sidebar Toggle Function
-      function toggleSidebar() {
-          sidebar.classList.toggle('active');
-          overlay.classList.toggle('active');
-          document.body.classList.toggle('sidebar-open');
-      }
-  
-      // Add event listeners for sidebar
-      if (sidebarToggle) {
-          sidebarToggle.addEventListener('click', toggleSidebar);
-      }
-  
-      if (closeSidebarBtn) {
-          closeSidebarBtn.addEventListener('click', toggleSidebar);
-      }
-  
-      if (overlay) {
-          overlay.addEventListener('click', toggleSidebar);
-      }
-  
-      // Handle window resize
-      window.addEventListener('resize', function() {
-          if (window.innerWidth > 768) {
-              sidebar.classList.remove('active');
-              overlay.classList.remove('active');
-              document.body.classList.remove('sidebar-open');
-          }
-      });
-  
-      // Logout functionality
-      const logoutBtn = document.querySelector('.logout span');
-      const logoutModal = document.getElementById('logoutModal');
-      const cancelLogoutBtn = document.getElementById('cancelLogout');
-      const confirmLogoutBtn = document.getElementById('confirmLogout');
-      
-      if (logoutBtn && logoutModal) {
-          logoutBtn.addEventListener('click', () => {
-              logoutModal.style.display = 'block';
-          });
-          
-          if (cancelLogoutBtn) {
-              cancelLogoutBtn.addEventListener('click', () => {
-                  logoutModal.style.display = 'none';
-              });
-          }
-          
-          if (confirmLogoutBtn) {
-              confirmLogoutBtn.addEventListener('click', () => {
-                  fetch('/logout', {
-                      method: 'POST',
-                      credentials: 'same-origin'
-                  })
-                  .then(response => {
-                      if (response.redirected) {
-                          window.location.href = response.url;
-                      } else {
-                          window.location.href = '/login?logout=success';
-                      }
-                  })
-                  .catch(error => {
-                      console.error('Logout error:', error);
-                      window.location.href = '/login';
-                  });
-              });
-          }
-      }
-  
-      // Close modal when clicking outside
-      window.addEventListener('click', function(event) {
-          if (event.target === logoutModal) {
-              logoutModal.style.display = 'none';
-          }
-      });
-  
-      // Initialize scanner
-      initScanner();
-  });
-  document.addEventListener('DOMContentLoaded', function() {
-    // Intercept all fetch/ajax calls
-    const originalFetch = window.fetch;
-    window.fetch = function() {
-        return originalFetch.apply(this, arguments)
-            .then(response => {
-                if (response.status === 401) {
-                    // Check if session expired
-                    const sessionExpired = response.headers.get('X-Session-Expired');
-                    if (sessionExpired) {
-                        window.location.href = '/login';
-                    }
-                }
-                return response;
+
+
+    /**
+     * Displays the payment confirmation overlay with details from paymentDataStore.
+     */
+    function showConfirmationOverlay() {
+        if (!paymentDataStore) return;
+
+        recipientName.textContent = paymentDataStore.username;
+        recipientId.textContent = `ID: ${paymentDataStore.userId}`;
+        paymentAmount.textContent = formatAmount(paymentDataStore.totalAmount, paymentDataStore.currency);
+        requestTime.textContent = new Date(paymentDataStore.timestamp).toLocaleString();
+
+        scannerOverlay.style.display = 'none';
+        confirmationOverlay.style.display = 'flex';
+    }
+
+
+    /**
+     * Handles the final payment confirmation and submission to the backend.
+     */
+    async function handleConfirmPayment() {
+        if (!paymentDataStore) return;
+
+        confirmPaymentBtn.disabled = true; // Prevent double-clicks
+        confirmPaymentBtn.textContent = 'Processing...';
+
+        try {
+            const base64Data = btoa(JSON.stringify(paymentDataStore));
+            const response = await fetch('/user/scan-and-pay', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain'
+                },
+                body: base64Data
             });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({
+                    error: 'An unknown payment error occurred.'
+                }));
+                throw new Error(errorData.error || 'Payment failed');
+            }
+
+            const result = await response.json();
+            showSuccessModal(result.transactionId);
+
+        } catch (error) {
+            errorMessage.textContent = error.message;
+            errorMessage.style.display = 'block';
+            confirmationOverlay.style.display = 'none'; // Hide confirmation on error
+            setTimeout(resetUI, 3000); // Reset after showing error
+        } finally {
+            confirmPaymentBtn.disabled = false; // Re-enable button
+            confirmPaymentBtn.textContent = 'Confirm Payment';
+            paymentDataStore = null; // Clear stored data
+        }
     }
+
+
+    /**
+     * Displays the success modal with transaction details.
+     * @param {string} transactionId
+     */
+    function showSuccessModal(transactionId) {
+        document.getElementById('successAmount').textContent = paymentAmount.textContent;
+        document.getElementById('successRecipient').textContent = recipientName.textContent;
+        document.getElementById('successTransactionId').textContent = transactionId || 'N/A';
+
+        confirmationOverlay.style.display = 'none';
+        successModal.style.display = 'flex';
+    }
+
+
+    /**
+     * Initializes and starts the QR code scanner.
+     */
+    function startScanner() {
+        const config = {
+            fps: 10,
+            qrbox: {
+                width: 220,
+                height: 220
+            },
+            aspectRatio: 1.0,
+        };
+
+        scannerOverlay.style.display = 'none';
+        errorMessage.style.display = 'none';
+
+        const cameraIdToUse = cameras.length > 0 ? cameras[currentCameraIndex].id : undefined;
+        html5QrCode.start({
+                deviceId: {
+                    exact: cameraIdToUse
+                }
+            },
+            config,
+            (decodedText, _) => processDecodedText(decodedText),
+            (errorMessage) => {
+                // This is the error callback, often called when no QR is found.
+                // We can ignore it to prevent console spam.
+            }
+        ).catch((err) => {
+            console.error("Error starting scanner:", err);
+            errorMessage.textContent = "Failed to start scanner. Please check camera permissions.";
+            errorMessage.style.display = "block";
+            resetUI();
+        });
+    }
+
+    /**
+     * Handles the file input for uploading a QR code image.
+     */
+    function handleImageUpload(event) {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type and size
+        if (!file.type.match('image.*')) {
+            errorMessage.textContent = 'Please upload a valid image file (JPEG, PNG, etc.).';
+            errorMessage.style.display = 'block';
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+            errorMessage.textContent = 'Image file is too large. Maximum size is 5MB.';
+            errorMessage.style.display = 'block';
+            return;
+        }
+
+        statusMessage.textContent = 'Processing image...';
+        stopScanner().then(() => {
+            html5QrCode.scanFile(file, true)
+                .then(decodedText => processDecodedText(decodedText))
+                .catch(err => {
+                    console.error("Error scanning file:", err);
+                    errorMessage.textContent = "Could not read QR code from the image. Please try another one.";
+                    errorMessage.style.display = 'block';
+                    resetUI();
+                });
+        });
+    }
+
+    // --- SIDEBAR AND MODAL LOGIC ---
+    function toggleSidebar() {
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+        document.body.classList.toggle('sidebar-open');
+    }
+
+    // --- INITIALIZATION AND EVENT LISTENERS ---
+
+    function initialize() {
+        // Initialize the QR Code scanner library
+        html5QrCode = new Html5Qrcode("reader");
+
+        // --- Attach Event Listeners (Done only once) ---
+        startScanBtn.addEventListener('click', startScanner);
+        cancelPaymentBtn.addEventListener('click', resetUI);
+        confirmPaymentBtn.addEventListener('click', handleConfirmPayment);
+        closeSuccessModal.addEventListener('click', resetUI);
+
+        // Upload QR button
+        uploadQrBtn.addEventListener('click', () => {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.addEventListener('change', handleImageUpload);
+            fileInput.click();
+        });
+
+        // Camera toggle
+        toggleCameraBtn.addEventListener('click', () => {
+            if (cameras.length > 1) {
+                stopScanner().then(() => {
+                    currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
+                    startScanner();
+                });
+            }
+        });
+
+
+        // Sidebar listeners
+        sidebarToggle?.addEventListener('click', toggleSidebar);
+        closeSidebarBtn?.addEventListener('click', toggleSidebar);
+        overlay?.addEventListener('click', toggleSidebar);
+
+
+        // Logout Modal listeners
+        if (logoutBtn && logoutModal) {
+            logoutBtn.addEventListener('click', () => logoutModal.style.display = 'block');
+            cancelLogoutBtn?.addEventListener('click', () => logoutModal.style.display = 'none');
+            confirmLogoutBtn?.addEventListener('click', () => window.location.href = '/logout');
+            // Close modal if clicked outside
+            window.addEventListener('click', (event) => {
+                if (event.target === logoutModal) {
+                    logoutModal.style.display = 'none';
+                }
+            });
+        }
+
+
+        // Fetch available cameras
+        Html5Qrcode.getCameras().then(devices => {
+            if (devices && devices.length) {
+                cameras = devices;
+                toggleCameraBtn.disabled = devices.length <= 1;
+            } else {
+                errorMessage.textContent = "No camera detected on this device.";
+                errorMessage.style.display = "block";
+                toggleCameraBtn.disabled = true;
+            }
+        }).catch(err => {
+            console.error("Could not get camera permissions:", err);
+            errorMessage.textContent = "Camera access is required. Please grant permission.";
+            errorMessage.style.display = "block";
+            toggleCameraBtn.disabled = true;
+        });
+
+        // Set initial UI state
+        resetUI();
+    }
+
+
+    // Run the initialization
+    initialize();
 });
+
+// --- GLOBAL FETCH INTERCEPTOR for session management ---
+document.addEventListener('DOMContentLoaded', function() {
+    const originalFetch = window.fetch;
+    window.fetch = function(...args) {
+        return originalFetch.apply(this, args).then(response => {
+            // Redirect to login if a 401 Unauthorized status is received
+            if (response.status === 401) {
+                const sessionExpired = response.headers.get('X-Session-Expired');
+                if (sessionExpired) {
+                    // Use replace to prevent the user from navigating back to the expired page
+                    window.location.replace('/login?reason=session-expired');
+                }
+            }
+            return response;
+        });
+    };
+});
+// Replace the existing showError function or add it if it doesn't exist
+function showError(message) {
+    errorMessage.textContent = message;
+    errorMessage.classList.add('show');
+    successMessage.classList.remove('show');
+    
+    // Auto hide after 5 seconds
+    setTimeout(() => {
+        errorMessage.classList.remove('show');
+    }, 5000);
+}
+function showSuccess(message) {
+    successMessage.textContent = message;
+    successMessage.classList.add('show');
+    errorMessage.classList.remove('show');
+    
+    // Auto hide after 5 seconds
+    setTimeout(() => {
+        successMessage.classList.remove('show');
+    }, 5000);
+}
+
+// Update the status message function
+function updateStatus(message) {
+    statusMessage.textContent = message;
+}
     </script>
   </body>
     </html>

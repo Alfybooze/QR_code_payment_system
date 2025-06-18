@@ -10,12 +10,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+
 import com.Alfy.xchange_Updated.Models.Users;
 import com.Alfy.xchange_Updated.Services.CurrencyService;
 import com.Alfy.xchange_Updated.Services.JwtService;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-
 import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Controller
@@ -96,10 +97,13 @@ public String dashboard(Model model, HttpServletRequest request) {
         model.addAttribute("role", user.getRole());
         model.addAttribute("balance", user.getBalance());
         model.addAttribute("jwt_token", jwtToken);
+        model.addAttribute("formattedRates", formatRatesForDisplay(rates));
         model.addAttribute("exchangeRates", rates); // Add formatted rates to the model
         model.addAttribute("AccountNumber", user.getAccountNumber());
         model.addAttribute("BankName", user.getBankName());
 
+
+        
         log.debug("Dashboard loaded successfully for user: {}", username);
         return "Dashboard";
 
@@ -107,6 +111,28 @@ public String dashboard(Model model, HttpServletRequest request) {
         log.error("Error loading dashboard", e);
         return "redirect:/login";
     }
+}private Map<String, String> formatRatesForDisplay(Map<String, Double> rates) {
+    Map<String, String> formatted = new HashMap<>();
+    try {
+        if (rates.containsKey("ngn_usd")) {
+            formatted.put("USD", String.format("₦%.2f = $1.00", 1/rates.get("ngn_usd")));
+        }
+        if (rates.containsKey("ngn_eur")) {
+            formatted.put("EUR", String.format("₦%.2f = €1.00", 1/rates.get("ngn_eur")));
+        }
+        if (rates.containsKey("ngn_gbp")) {
+            formatted.put("GBP", String.format("₦%.2f = £1.00", 1/rates.get("ngn_gbp")));
+        }
+        if (rates.containsKey("ngn_btc")) {
+            formatted.put("BTC", String.format("₦%.2f = ₿1.00", 1/rates.get("ngn_btc")));
+        }
+        if (rates.containsKey("ngn_eth")) {
+            formatted.put("ETH", String.format("₦%.2f = Ξ1.00", 1/rates.get("ngn_eth")));
+        }
+    } catch (Exception e) {
+        log.error("Error formatting rates: {}", e.getMessage());
+    }
+    return formatted;
 }
     @PostMapping("/logout")
 public String logout(HttpServletRequest request) {

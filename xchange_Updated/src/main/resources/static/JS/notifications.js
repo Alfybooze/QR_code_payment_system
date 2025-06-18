@@ -11,14 +11,15 @@ class NotificationHandler {
         this.createNotificationContainer();
     }
 
-    createNotificationContainer() {
-        if (!document.getElementById('notification-container')) {
-            const container = document.createElement('div');
-            container.id = 'notification-container';
-            container.className = 'notification-container';
-            document.body.appendChild(container);
-        }
+ createNotificationContainer() {
+    let container = document.getElementById('notification-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'notification-container';
+        document.body.appendChild(container);
+        console.log('Notification container created');
     }
+}
 
     connectWebSocket() {
         if (!this.userId) {
@@ -104,33 +105,72 @@ class NotificationHandler {
         }
     }
 
-    showNotification(data) {
-        const container = document.getElementById('notification-container');
-        const notification = document.createElement('div');
-        notification.className = `transaction-notification ${data.type.toLowerCase()}`;
-        notification.innerHTML = `
-            <div class="notification-content">
-                <i class="fas fa-${data.type === 'INCOMING' ? 'arrow-down text-success' : 'arrow-up text-primary'}"></i>
-                <div class="notification-text">
-                    <strong>${data.type === 'INCOMING' ? 'Payment Received' : 'Payment Sent'}</strong>
-                    <p>${data.message}</p>
-                    <small>${data.timestamp}</small>
-                </div>
-                <button class="notification-close">&times;</button>
-            </div>
-        `;
-
-        container.insertBefore(notification, container.firstChild);
-        this.setupNotificationClose(notification);
-        this.playNotificationSound();
-
-        // Request browser notification permission
-        this.requestNotificationPermission().then(permission => {
-            if (permission === 'granted') {
-                this.showBrowserNotification(data);
-            }
-        });
+ // Update the showNotification method
+showNotification(data) {
+    const container = document.getElementById('notification-container');
+    if (!container) {
+        console.error('Notification container not found');
+        return;
     }
+
+    const notification = document.createElement('div');
+    notification.className = `transaction-notification ${data.type.toLowerCase()}`;
+    
+    // Add notification content
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-${data.type === 'INCOMING' ? 'arrow-down' : 'arrow-up'}" 
+               style="color: ${data.type === 'INCOMING' ? '#48bb78' : '#4299e1'}">
+            </i>
+            <div class="notification-text">
+                <strong>${data.type === 'INCOMING' ? 'Payment Received' : 'Payment Sent'}</strong>
+                <p>${data.message}</p>
+                <small>${data.timestamp}</small>
+            </div>
+            <button class="notification-close" aria-label="Close notification">&times;</button>
+        </div>
+    `;
+
+    // Add to container
+    container.appendChild(notification);
+    
+    // Trigger entrance animation
+    requestAnimationFrame(() => {
+        container.classList.add('notification-enter');
+    });
+
+    // Setup close button
+    const closeBtn = notification.querySelector('.notification-close');
+    closeBtn.addEventListener('click', () => {
+        notification.classList.add('closing');
+        setTimeout(() => {
+            notification.remove();
+            if (container.children.length === 0) {
+                container.classList.remove('notification-enter');
+            }
+        }, 500); // Match animation duration
+    });
+
+    // Auto dismiss after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) { // Check if notification still exists
+            notification.classList.add('closing');
+            setTimeout(() => {
+                notification.remove();
+                if (container.children.length === 0) {
+                    container.classList.remove('notification-enter');
+                }
+            }, 500);
+        }
+    }, 5000);
+}
+checkNotificationSystem() {
+    console.log('Notification system status:');
+    console.log('Container exists:', !!document.getElementById('notification-container'));
+    console.log('WebSocket connected:', this.stompClient?.connected);
+    console.log('User ID:', this.userId);
+    console.log('Username:', this.username);
+}
 
     async requestNotificationPermission() {
         if (!('Notification' in window)) return 'denied';
@@ -221,6 +261,23 @@ class NotificationHandler {
         }
     }
 }
+
+// Run after DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        if (notificationHandler) {
+            notificationHandler.checkNotificationSystem();
+            
+            // Test notification
+            notificationHandler.showNotification({
+                type: 'INCOMING',
+                message: 'Test notification',
+                amount: 1000,
+                timestamp: new Date().toLocaleString()
+            });
+        }
+    }, 1000);
+});
 
 // Initialize notification handler
 const notificationHandler = new NotificationHandler();

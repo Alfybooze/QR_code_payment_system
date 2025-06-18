@@ -8,23 +8,31 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link th:href="@{/css/Landing.css}" rel="stylesheet">
     <link th:href="@{/css/authentication.css}" rel="stylesheet">
+    <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
+    <script th:src="@{/js/loading.js}" defer></script>
 </head>
 <body>
+        <div class="loading-overlay" id="loadingOverlay">
+        <dotlottie-player 
+            src="https://lottie.host/dea15329-3deb-4041-befb-1a46439a9296/1sy2yaIuNl.lottie"
+            background="transparent"
+            speed="1"
+            style="width: 200px; height: 200px;"
+            loop
+            autoplay>
+        </dotlottie-player>
+        <p class="loading-text">Loading...</p>
+    </div>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <nav class="navbar navbar-expand navbar-dark fixed-top" style="background-color: transparent;">
         <div class="container">
             <a class="navbar-brand fade-in" th:href="@{/}">
                 <i class="fas fa-qrcode me-2"></i>XChange
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item ms-lg-3">
-                        <a class="nav-link btn btn-primary px-4" th:href="@{/}">Go back</a>
-                    </li>
-                </ul>
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item">
+                    <a class="nav-link btn btn-primary px-4" th:href="@{/}">Go back</a>
+                </div>
             </div>
         </div>
     </nav>
@@ -182,6 +190,30 @@
                 }, 3000);
             }
         });
+        document.addEventListener('DOMContentLoaded', () => {
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                const content = document.querySelector('.content');
+
+                // Show loading screen immediately
+                loadingOverlay.style.display = 'flex';
+                
+                // Wait for everything to load
+                window.addEventListener('load', () => {
+                    // Small delay to ensure smooth transition
+                    setTimeout(() => {
+                        // Hide loading screen
+                        loadingOverlay.classList.add('hidden');
+                        
+                        // Show content
+                        content.classList.add('visible');
+                        
+                        // Clean up loading overlay after animation
+                        setTimeout(() => {
+                            loadingOverlay.style.display = 'none';
+                        }, 500); // Match the CSS transition duration
+                    }, 300);
+                });
+            });
     </script>
 </body>
 </html>
