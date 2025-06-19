@@ -356,7 +356,7 @@ public ResponseEntity<?> getUserTransactions(
             .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Get transactions based on filter
-        List<Transaction> transactions = transactionService.getTransactionHistory(currentUser.getId());
+        List<Transaction> transactions = transactionService.getTransactionHistory(currentUser.getId(),5);
         
         // Calculate totals
         Double incomingTotal = transactionService.getIncomingTotal(currentUser.getId());

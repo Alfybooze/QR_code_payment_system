@@ -1222,3 +1222,30 @@
     visibility: visible;
     opacity: 1;
 }
+/* Styles for outgoing amounts */
+.outgoing-amount {
+    color: var(--accent-red); /* Or a similar color indicating deduction */
+    font-weight: bold;
+}
+
+/* Styles for incoming amounts */
+.incoming-amount {
+    color: var(--accent-green); /* Or a similar color indicating addition */
+    font-weight: bold;
+}
+
+/* Base styles for transaction rows */
+.rank-row.transaction-row {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr; /* Adjust column widths as needed */
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+    align-items: center;
+    cursor: pointer; /* Indicates it's clickable for details */
+    transition: background-color 0.2s ease;
+}
+
+.rank-row.transaction-row:hover {
+    background-color: var(--hover-bg);
+}

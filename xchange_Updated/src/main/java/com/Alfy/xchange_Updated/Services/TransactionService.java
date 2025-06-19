@@ -67,8 +67,8 @@ public class TransactionService {
         TransactionNotification sellerNotification = createNotification(transaction, TRANSACTION_TYPE_INCOMING);
         webSocketService.notifyTransactionUpdate(String.valueOf(transaction.getSeller().getId()), sellerNotification);
     }
-    public List<Transaction> getTransactionHistory(Long userId) {
-        return transactionRepository.findByBuyerIdOrSellerId(userId, userId);
+    public List<Transaction> getTransactionHistory(Long userId, int limit) {
+        return transactionRepository.findRecentTransactions(userId, limit);
     }
 
     public Double getIncomingTotal(Long userId) {
