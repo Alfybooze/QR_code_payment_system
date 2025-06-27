@@ -4,26 +4,37 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import com.Alfy.xchange_Updated.Models.Transaction;
 import com.Alfy.xchange_Updated.Models.Users;
 import com.Alfy.xchange_Updated.Services.CurrencyService;
 import com.Alfy.xchange_Updated.Services.JwtService;
+import com.Alfy.xchange_Updated.Services.TransactionService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+
+
 @Slf4j
 @Controller
 public class Webpage_Controller {
   private final JwtService jwtService;
 @Autowired
 private CurrencyService currencyService;
+@Autowired
+private TransactionService transactionService;
 
     @Autowired
     public Webpage_Controller(JwtService jwtService) {
@@ -133,6 +144,74 @@ public String dashboard(Model model, HttpServletRequest request) {
         log.error("Error formatting rates: {}", e.getMessage());
     }
     return formatted;
+}
+
+@GetMapping("/transactions")
+public String transactionHistory(Model model, Authentication authentication,
+                               @RequestParam(defaultValue = "0") int page,
+                               @RequestParam(defaultValue = "20") int size,
+                               @RequestParam(required = false) String year,
+                               @RequestParam(required = false) String month) {
+    
+    if (authentication == null) {
+        return "redirect:/login";
+    }
+   
+    Users user = (Users) authentication.getPrincipal();
+   
+    // Create pageable
+    Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
+   
+    Page<Transaction> transactions;
+    
+    // Check if year and month parameters are provided for filtering
+    if (year != null && !year.isEmpty() && month != null && !month.isEmpty()) {
+        try {
+            int yearInt = Integer.parseInt(year);
+            int monthInt = Integer.parseInt(month);
+            
+            // Get transactions for specific month and year
+            transactions = transactionService.getTransactionsByUserAndMonth(
+                user.getId(), yearInt, monthInt, pageable
+            );
+            
+            // Add filter parameters to model for maintaining state in view
+            model.addAttribute("selectedYear", year);
+            model.addAttribute("selectedMonth", month);
+            
+        } catch (IllegalArgumentException e) {
+            // If parsing fails, fall back to all transactions
+            transactions = transactionService.getAllTransactionsByUser(user.getId(), pageable);
+            model.addAttribute("filterError", "Invalid year or month format");
+        }
+    } else if (year != null && !year.isEmpty()) {
+        // If only year is provided, get transactions for the entire year
+        try {
+            int yearInt = Integer.parseInt(year);
+            transactions = transactionService.getTransactionsByUserAndYear(
+                user.getId(), yearInt, pageable
+            );
+            model.addAttribute("selectedYear", year);
+        } catch (NumberFormatException e) {
+            transactions = transactionService.getAllTransactionsByUser(user.getId(), pageable);
+            model.addAttribute("filterError", "Invalid year format");
+        }
+    } else {
+        // No filters applied, get ALL transactions for the user
+        transactions = transactionService.getAllTransactionsByUser(user.getId(), pageable);
+    }
+   
+    // Add common attributes to model
+    model.addAttribute("user", user);
+    model.addAttribute("username", user.getUsername());
+    model.addAttribute("id", user.getId());
+    model.addAttribute("balance", user.getBalance());
+    model.addAttribute("transactions", transactions);
+    model.addAttribute("currentPage", page);
+    model.addAttribute("totalPages", transactions.getTotalPages());
+    model.addAttribute("totalElements", transactions.getTotalElements());
+   
+    return "Transactions";
 }
     @PostMapping("/logout")
 public String logout(HttpServletRequest request) {

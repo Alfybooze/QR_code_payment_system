@@ -2,7 +2,8 @@ package com.Alfy.xchange_Updated.Repositories;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -53,4 +54,31 @@ List<Transaction> findTransactionsForChart(
     @Param("endDate") LocalDateTime endDate
 );
 
+// Your TransactionRepository interface should have this pageable method
+@Query("SELECT t FROM Transaction t WHERE (t.buyer.id = :userId OR t.seller.id = :userId) " +
+       "AND t.timestamp BETWEEN :startDate AND :endDate " +
+       "ORDER BY t.timestamp DESC")
+Page<Transaction> findAllByUserIdAndMonth(
+    @Param("userId") Long userId,
+    @Param("startDate") LocalDateTime startDate,
+    @Param("endDate") LocalDateTime endDate,
+    org.springframework.data.domain.Pageable pageable
+);
+
+// Optional: Keep the original List version for cases where you need all results
+@Query("SELECT t FROM Transaction t WHERE (t.buyer.id = :userId OR t.seller.id = :userId) " +
+       "AND t.timestamp BETWEEN :startDate AND :endDate " +
+       "ORDER BY t.timestamp DESC")
+List<Transaction> findAllByUserIdAndMonthList(
+    @Param("userId") Long userId,
+    @Param("startDate") LocalDateTime startDate,
+    @Param("endDate") LocalDateTime endDate
+);
+
+@Query("SELECT t FROM Transaction t WHERE (t.buyer.id = :userId OR t.seller.id = :userId) " +
+       "ORDER BY t.timestamp DESC")
+Page<Transaction> findAllByUserId(
+    @Param("userId") Long userId,
+    org.springframework.data.domain.Pageable pageable
+);
 }

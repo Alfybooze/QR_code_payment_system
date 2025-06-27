@@ -192,8 +192,8 @@
         display: block;
     }
         .user-avatar {
-        width: 32px;
-        height: 32px;
+        width: 2rem;
+        height: 2rem;
     }
 
     .user-avatar-text {
@@ -405,8 +405,8 @@
       }
   
       .user-avatar {
-        width: 32px;
-        height: 32px;
+        width: 2rem;
+        height: 2rem;
         border-radius: 50%;
         background-color: #e0e0e0;
         margin-right: 8px;
@@ -1248,4 +1248,12 @@
 
 .rank-row.transaction-row:hover {
     background-color: var(--hover-bg);
+}
+.form-select:focus {
+    outline: none;
+    box-shadow: none;
+    border-color: transparent; /* Optional: keep border consistent */
+}
+.modal{
+  left: 1.1rem !important;
 }

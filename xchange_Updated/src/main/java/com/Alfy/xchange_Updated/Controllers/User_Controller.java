@@ -3,6 +3,7 @@ package com.Alfy.xchange_Updated.Controllers;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +13,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -63,7 +67,7 @@ public class User_Controller {
     private final TransactionService transactionService;
     private final CurrencyService currencyService;
     private final EmailService emailService;
-    private SmsService smsService;
+    private final SmsService smsService;
 
     @Autowired
     public User_Controller(UserService userService, AuthenticationManager authenticationManager, JwtService jwtService,QRCodeService qrCodeService, UsersRepository usersRepository, TransactionService transactionService, CurrencyService currencyService, EmailService emailService, SmsService smsService) {
@@ -408,6 +412,8 @@ public ResponseEntity<?> getUserTransactions(
             .body(new ErrorResponse("Failed to fetch transactions: " + e.getMessage()));
     }
 }
+
+
 
 // Helper method to format amount
 private String formatAmount(Double amount) {

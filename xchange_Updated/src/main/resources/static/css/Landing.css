@@ -445,6 +445,10 @@ body {
         display: block;
         width: 100%;
     }
+    .navbar-toggler:focus {
+    outline: none;
+    box-shadow: none;
+} 
 }
 
 

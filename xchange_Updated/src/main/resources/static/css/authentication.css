@@ -398,6 +398,7 @@
         margin-top: 0.9rem;
     }
 }
+
 .input-group-text,
 #togglePassword {
     display: flex;
@@ -408,8 +409,7 @@
     border: none;
     color: #6c757d;
 }
-.input-group-text,
-#togglePassword {
+#toggleConfirmPassord{
     display: flex;
     align-items: center;
     justify-content: center;
@@ -426,6 +426,11 @@
     box-shadow: none;
     outline: none;
     color: var(--primary-color);
+}
+#toggleConfirmPassword:focus{
+box-shadow: none;
+outline: none;
+color: var(--primary-color);
 } 
 .verification-inputs .code-input {
     width: 50px;
@@ -467,6 +472,13 @@
 }
 
   @media (max-width: 576px) {
+       .auth-section {
+        padding: 40px 10px;
+    }
+    
+    .auth-card .card-body {
+        padding: 1.25rem !important;
+    }
     .verification-inputs .code-input {
       width: 40px;
       height: 45px;
