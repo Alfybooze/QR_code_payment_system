@@ -93,17 +93,22 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Filter change handlers - these will navigate to new pages
-        [yearFilter, monthFilter].forEach(filter => {
-            if (filter) {
-                filter.addEventListener('change', handleFilterChange);
-            }
-        });
-
-        // Client-side filters for immediate feedback
+        // REMOVED: Automatic filter change handlers for year and month
+        // Only keep the type filter for client-side filtering
         if (typeFilter) {
             typeFilter.addEventListener('change', applyClientSideFilters);
         }
+
+        // Optional: Add Enter key support for filters
+        [yearFilter, monthFilter].forEach(filter => {
+            if (filter) {
+                filter.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        applyFilters();
+                    }
+                });
+            }
+        });
     }
 
     function connectWebSocket() {
@@ -158,7 +163,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 2000);
     }
 
-    function handleFilterChange() {
+    function applyFilters() {
+        // Show loading state
+        showLoading(true);
+        
         // Get current filter values
         const year = yearFilter?.value || '';
         const month = monthFilter?.value || '';
@@ -171,11 +179,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Navigate to filtered page
         const newUrl = `/transactions${params.toString() ? '?' + params.toString() : ''}`;
         window.location.href = newUrl;
-    }
-
-    function applyFilters() {
-        // This function triggers server-side filtering by navigating to a new URL
-        handleFilterChange();
     }
 
     function applyClientSideFilters() {

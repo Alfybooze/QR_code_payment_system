@@ -15,9 +15,17 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
   <link th:href="@{/css/scan_pay.css}" rel="stylesheet">
   <script type="module" src="/js/notifications.js"></script>
+   <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
+    <script th:src="@{/js/loading.js}" defer></script>
 </head>
 
 <body>
+  <div class="loading-overlay" id="loadingOverlay">
+    <dotlottie-player src="https://lottie.host/dea15329-3deb-4041-befb-1a46439a9296/1sy2yaIuNl.lottie"
+      background="transparent" speed="1" style="width: 200px; height: 200px;" loop autoplay>
+    </dotlottie-player>
+    <p class="loading-text">Loading...</p>
+  </div>
   <div class="container">
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">

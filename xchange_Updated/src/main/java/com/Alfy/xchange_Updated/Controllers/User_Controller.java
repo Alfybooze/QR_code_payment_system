@@ -3,7 +3,6 @@ package com.Alfy.xchange_Updated.Controllers;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -13,9 +12,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -294,61 +290,7 @@ public class User_Controller {
             );
         }
     }
-
-    @PutMapping("/role")
-public ResponseEntity<?> updateRole(@RequestParam String username, @RequestParam String role) {
-    try {
-        Users updatedUser = userService.updateUserRole(username, role);
-        return ResponseEntity.ok("User role updated to: " + updatedUser.getRole());
-    } catch (IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
-    } catch (RuntimeException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-    }
-}
-@PutMapping("/update_bal/{id}")
-public double updateUserBalance(@RequestParam String username, @RequestParam double amount) {
-    try {
-        Users user = userService.updateUserBalance(username, amount);
-        return user.getBalance();
-    } catch (IllegalArgumentException e) {
-        throw new RuntimeException("Invalid amount: " + e.getMessage());
-    } catch (RuntimeException e) {
-        throw new RuntimeException("User not found: " + e.getMessage());
-    }
-
-}
-@PutMapping("/update-bank-details")
-public ResponseEntity<?> updateBankDetails(
-        @RequestParam String accountNumber,
-        @RequestParam String bankName) {
-    try {
-        // Get current authenticated user
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-
-        Users updatedUser = userService.updateBankDetails(username, accountNumber, bankName);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "SUCCESS");
-        response.put("message", "Bank details updated successfully");
-        response.put("accountNumber", updatedUser.getAccountNumber());
-        response.put("bankName", updatedUser.getBankName());
-
-        return ResponseEntity.ok(response);
-
-    } catch (IllegalArgumentException e) {
-        log.error("Invalid bank details: {}", e.getMessage());
-        return ResponseEntity.badRequest()
-            .body(new ErrorResponse("Invalid bank details: " + e.getMessage()));
-    } catch (Exception e) {
-        log.error("Failed to update bank details: ", e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(new ErrorResponse("Failed to update bank details: " + e.getMessage()));
-    }
-}
-
-@GetMapping("/transactions")
+    @GetMapping("/transactions")
 public ResponseEntity<?> getUserTransactions(
     @RequestParam(required = false) String filter, 
     @RequestParam(required = false, defaultValue = "10") int limit) {
@@ -412,7 +354,58 @@ public ResponseEntity<?> getUserTransactions(
             .body(new ErrorResponse("Failed to fetch transactions: " + e.getMessage()));
     }
 }
+    @PutMapping("/role")
+public ResponseEntity<?> updateRole(@RequestParam String username, @RequestParam String role) {
+    try {
+        Users updatedUser = userService.updateUserRole(username, role);
+        return ResponseEntity.ok("User role updated to: " + updatedUser.getRole());
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+}
+@PutMapping("/update_bal/{id}")
+public double updateUserBalance(@RequestParam String username, @RequestParam double amount) {
+    try {
+        Users user = userService.updateUserBalance(username, amount);
+        return user.getBalance();
+    } catch (IllegalArgumentException e) {
+        throw new RuntimeException("Invalid amount: " + e.getMessage());
+    } catch (RuntimeException e) {
+        throw new RuntimeException("User not found: " + e.getMessage());
+    }
 
+}
+@PutMapping("/update-bank-details")
+public ResponseEntity<?> updateBankDetails(
+        @RequestParam String accountNumber,
+        @RequestParam String bankName) {
+    try {
+        // Get current authenticated user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        Users updatedUser = userService.updateBankDetails(username, accountNumber, bankName);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "SUCCESS");
+        response.put("message", "Bank details updated successfully");
+        response.put("accountNumber", updatedUser.getAccountNumber());
+        response.put("bankName", updatedUser.getBankName());
+
+        return ResponseEntity.ok(response);
+
+    } catch (IllegalArgumentException e) {
+        log.error("Invalid bank details: {}", e.getMessage());
+        return ResponseEntity.badRequest()
+            .body(new ErrorResponse("Invalid bank details: " + e.getMessage()));
+    } catch (Exception e) {
+        log.error("Failed to update bank details: ", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(new ErrorResponse("Failed to update bank details: " + e.getMessage()));
+    }
+}
 
 
 // Helper method to format amount

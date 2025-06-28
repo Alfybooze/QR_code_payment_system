@@ -9,4 +9,4 @@ public class XchangeUpdatedApplication {
     public static void main(String[] args) {
         SpringApplication.run(XchangeUpdatedApplication.class, args);
     }
-}      
+}    

@@ -1,842 +1,853 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="user-id" th:content="${id}">
-  <meta name="username" th:content="${username}"/>
-  <title>XChange - Dashboard</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="user-id" th:content="${id}">
+    <meta name="username" th:content="${username}" />
+    <title>XChange - Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-  <link th:href="@{/css/dashboard.css}" rel="stylesheet">
-  <script type="module" th:src="@{/js/notifications.js}"></script>
-  <script th:src="@{/js/profile.js}"></script>
-  <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <link th:href="@{/css/dashboard.css}" rel="stylesheet">
+    <script type="module" th:src="@{/js/notifications.js}"></script>
+    <script th:src="@{/js/profile.js}"></script>
+    <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
     <script th:src="@{/js/loading.js}" defer></script>
 
 </head>
+
 <body>
-      <div class="loading-overlay" id="loadingOverlay">
-        <dotlottie-player 
-            src="https://lottie.host/dea15329-3deb-4041-befb-1a46439a9296/1sy2yaIuNl.lottie"
-            background="transparent"
-            speed="1"
-            style="width: 200px; height: 200px;"
-            loop
-            autoplay>
+    <div class="loading-overlay" id="loadingOverlay">
+        <dotlottie-player src="https://lottie.host/dea15329-3deb-4041-befb-1a46439a9296/1sy2yaIuNl.lottie"
+            background="transparent" speed="1" style="width: 200px; height: 200px;" loop autoplay>
         </dotlottie-player>
         <p class="loading-text">Loading...</p>
     </div>
-  <div class="container">
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-      <div class="logo">
-        <div class="logo-icon">
-          <i class="fas fa-qrcode"></i>
-        </div>
-        <span>Xchange</span>
-      </div>
-      <button class="close-sidebar">
-        <i class="fas fa-times"></i>
-    </button>
-    </div>
-    <div class="menu-section">
-      <div class="menu-title">Menu</div>
-      <div class="menu-item active">
-              <i class="fas fa-th-large"></i>
-              <span><a href="/dashboard">Dashboard</a></span>
-      </div>
-      <div class="menu-item">
-              <i class="fas fa-qrcode"></i>
-              <span ><a href="/generate-qr">Generate QR</a></span>
-      </div>
-      <div class="menu-item">
-        <i class="fa-solid fa-expand"></i>
-              <span><a href="/scan-pay">Scan QR</a></span>
-      </div>
-        <div class="menu-item">
-          <i class="fas fa-exchange-alt"></i>
-          <span ><a href="/transactions"> Transactions</a></span>
-        </div>
-        <div class="menu-item">
-          <i class="fas fa-chart-line"></i>
-          <span> <a href="" >Analytics</a></span>
-        </div>
-        <div class="menu-item">
-          <i class="fas fa-cog"></i>
-          <span><a href="">Settings</a></span>
-        </div>
-      </div>
-
-      <div class="menu-section">
-        <div class="menu-title">Payment Methods</div>
-        <div class="menu-item">
-          <i class="fab fa-bitcoin"></i>
-          <span style="margin-left:5px;">Bitcoin</span>
-        </div>
-        <div class="menu-item">
-          <i class="fab fa-ethereum"></i>
-          <span style="margin-left:5px;">Ethereum</span>
-        </div>
-        <div class="menu-item">
-          <i class="fas fa-dollar-sign"></i>
-          <span style="margin-left:5px;">USD</span>
-        </div>
-      </div>
-
-      <div class="logout">
-        <i class="fas fa-sign-out-alt"></i>
-        <span style="cursor:pointer;">Logout</span>
-      </div>
-    </div>
-
-
-    <!-- Main Content -->
-    <div class="main-content">
-      <div class="header">
-        <button id="sidebar-toggle" class="sidebar-toggle">
-            <i class="fas fa-bars"></i>
-        </button>
-        <div class="user-menu">
-          <button class="connect-wallet">
-            <i class="fas fa-wallet"></i>
-            Connect wallet
-          </button>
-        <div class="user-profile" onclick="showUserProfileModal()">
-            <div class="user-avatar" >
-                <i class="fas fa-user" style="font-size: 1rem !important;"></i>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-qrcode"></i>
+                    </div>
+                    <span>Xchange</span>
+                </div>
+                <button class="close-sidebar">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <span class="username" th:text="${username}">JOHN DOE</span>
+            <div class="menu-section">
+                <div class="menu-title">Menu</div>
+                <div class="menu-item active">
+                    <i class="fas fa-th-large"></i>
+                    <span><a href="/dashboard">Dashboard</a></span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-qrcode"></i>
+                    <span><a href="/generate-qr">Generate QR</a></span>
+                </div>
+                <div class="menu-item">
+                    <i class="fa-solid fa-expand"></i>
+                    <span><a href="/scan-pay">Scan QR</a></span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span><a href="/transactions"> Transactions</a></span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span> <a href="">Analytics</a></span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-cog"></i>
+                    <span><a href="">Settings</a></span>
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-title">Payment Methods</div>
+                <div class="menu-item">
+                    <i class="fab fa-bitcoin"></i>
+                    <span style="margin-left:5px;">Bitcoin</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fab fa-ethereum"></i>
+                    <span style="margin-left:5px;">Ethereum</span>
+                </div>
+                <div class="menu-item">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span style="margin-left:5px;">USD</span>
+                </div>
+            </div>
+
+            <div class="logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span style="cursor:pointer;">Logout</span>
+            </div>
         </div>
 
-      <div id="userProfileModal" class="user-profile-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Profile Details</h2>
-                <span class="close-modal" onclick="hideUserProfileModal()">&times;</span>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <button id="sidebar-toggle" class="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="user-menu">
+                    <button class="connect-wallet">
+                        <i class="fas fa-wallet"></i>
+                        Connect wallet
+                    </button>
+                    <div class="user-profile" onclick="showUserProfileModal()">
+                        <div class="user-avatar">
+                            <i class="fas fa-user" style="font-size: 1rem !important;"></i>
+                        </div>
+                        <span class="username" th:text="${username}">JOHN DOE</span>
+                    </div>
+
+                    <div id="userProfileModal" class="user-profile-modal">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h2>Profile Details</h2>
+                                <span class="close-modal" onclick="hideUserProfileModal()">&times;</span>
+                            </div>
+                            <div class="profile-info">
+                                <div class="info-card">
+                                    <div class="info-row">
+                                        <i class="fas fa-user"></i>
+                                        <div class="info-detail">
+                                            <label>Username</label>
+                                            <span th:text="${username}"></span>
+                                        </div>
+                                    </div>
+                                    <div class="info-row">
+                                        <i class="fas fa-envelope"></i>
+                                        <div class="info-detail">
+                                            <label>Email</label>
+                                            <span th:text="${email}"></span>
+                                        </div>
+                                    </div>
+                                    <div class="info-row">
+                                        <i class="fas fa-university"></i>
+                                        <div class="info-detail">
+                                            <label>Account Number</label>
+                                            <span th:text="${AccountNumber}"></span>
+                                        </div>
+                                    </div>
+                                    <div class="info-row">
+                                        <i class="fas fa-building-columns"></i>
+                                        <div class="info-detail">
+                                            <label>Bank Name</label>
+                                            <span th:text="${BankName}"></span>
+                                        </div>
+                                    </div>
+                                    <div class="info-row">
+                                        <i class="fas fa-id-card"></i>
+                                        <div class="info-detail">
+                                            <label>User ID</label>
+                                            <span th:text="${id}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
-            <div class="profile-info">
-                <div class="info-card">
-                    <div class="info-row">
-                        <i class="fas fa-user"></i>
-                        <div class="info-detail">
-                            <label>Username</label>
-                            <span th:text="${username}"></span>
+            <!-- Currency Overview -->
+            <div class="currency-overview">
+                <div class="currency-card blue">
+                    <div class="currency-details">
+                        <div class="currency-value">USD 0.453</div>
+                        <div class="currency-change negative-change">-6.81%</div>
+                    </div>
+                </div>
+                <div class="currency-card purple">
+                    <div class="currency-details">
+                        <div class="currency-value">BTC 0.033</div>
+                        <div class="currency-change positive-change">+0.12%</div>
+                    </div>
+                </div>
+                <div class="currency-card red">
+                    <div class="currency-details">
+                        <div class="currency-value">ETH 0.333</div>
+                        <div class="currency-change positive-change">+0.15%</div>
+                    </div>
+                </div>
+                <!-- Currency Overview -->
+                <div class="currency-overview">
+                    <!-- Current Balance Card -->
+                    <div class="currency-card green">
+                        <div class="currency-details">
+                            <div class="currency-title" style="color:black;">Current Balance</div>
+                            <div class="currency-value" style="color:Black !important;">
+                                <span class="Available_balance">₦0.00</span>
+                            </div>
+                            <div class="currency-change positive-change">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>Updated</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="info-row">
-                        <i class="fas fa-envelope"></i>
-                        <div class="info-detail">
-                            <label>Email</label>
-                            <span th:text="${email}"></span>
+
+                    <!-- Other currency cards -->
+                    <div class="currency-card blue">
+                        <div class="currency-details">
+                            <div class="currency-value">USD 0.453</div>
+                            <div class="currency-change negative-change">-6.81%</div>
                         </div>
                     </div>
-                    <div class="info-row">
-                        <i class="fas fa-university"></i>
-                        <div class="info-detail">
-                            <label>Account Number</label>
-                            <span th:text="${AccountNumber}"></span>
+                    <!-- ... rest of the currency cards ... -->
+                </div>
+            </div>
+            <!-- Exchange Rate Section -->
+            <div class="data-cards">
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <div class="data-card-title">Exchange Rates</div>
+                        <button class="data-card-action">Live</button>
+                    </div>
+
+                    <div class="currency-rates">
+                        <div class="rate-item">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span><i class="fas fa-naira-sign"></i> NGN to USD</span>
+                                <strong th:with="rate=${exchangeRates.get('ngn_usd')}"
+                                    th:text="${rate != null ? '₦' + #numbers.formatDecimal(1/rate, 1, 'COMMA', 2, 'POINT') + ' = $1.00' : 'Rate unavailable'}">
+                                    ₦1,420.00 = $1.00
+                                </strong>
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); text-align: right;">
+                                <span
+                                    th:class="${exchangeRates.USD_change >= 0 ? 'positive-change' : 'negative-change'}"
+                                    th:text="${(exchangeRates.USD_change >= 0 ? '+' : '') + #numbers.formatDecimal(exchangeRates.USD_change, 1, 1) + '% (24h)'}">-2.5%
+                                    (24h)</span>
+                            </div>
+                        </div>
+
+                        <div class="rate-item">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span><i class="fas fa-euro-sign"></i> NGN to EUR</span>
+                                <strong th:with="rate=${exchangeRates.get('ngn_eur')}"
+                                    th:text="${rate != null ? '₦' + #numbers.formatDecimal(1/rate, 1, 'COMMA', 2, 'POINT') + ' = €1.00' : 'Rate unavailable'}">
+                                    ₦1,530.00 = €1.00
+                                </strong>
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); text-align: right;">
+                                <span
+                                    th:class="${exchangeRates.EUR_change >= 0 ? 'positive-change' : 'negative-change'}"
+                                    th:text="${(exchangeRates.EUR_change >= 0 ? '+' : '') + #numbers.formatDecimal(exchangeRates.EUR_change, 1, 1) + '% (24h)'}">0(24h)</span>
+                            </div>
+                        </div>
+
+                        <div class="rate-item">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span><i class="fas fa-pound-sign"></i> NGN to GBP</span>
+                                <strong th:with="rate=${exchangeRates.get('ngn_gbp')}"
+                                    th:text="${rate != null ? '₦' + #numbers.formatDecimal(1/rate, 1, 'COMMA', 2, 'POINT') + ' = £1.00' : 'Rate unavailable'}">
+                                    ₦1,825.00 = £1.00
+                                </strong>
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); text-align: right;">
+                                <span
+                                    th:class="${exchangeRates.GBP_change >= 0 ? 'positive-change' : 'negative-change'}"
+                                    th:text="${(exchangeRates.GBP_change >= 0 ? '+' : '') + #numbers.formatDecimal(exchangeRates.GBP_change, 1, 1) + '% (24h)'}">0(24h)</span>
+                            </div>
+                        </div>
+
+                        <div class="rate-item">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span><i class="fab fa-bitcoin"></i> NGN to BTC</span>
+                                <strong th:with="rate=${exchangeRates.get('ngn_btc')}"
+                                    th:text="${rate != null ? '₦' + #numbers.formatDecimal(1/rate, 1, 'COMMA', 2, 'POINT') + ' = ₿1.00' : 'Rate unavailable'}">
+                                    ₦66,450,000 = ₿1.00
+                                </strong>
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); text-align: right;">
+                                <span
+                                    th:class="${exchangeRates.BTC_change >= 0 ? 'positive-change' : 'negative-change'}"
+                                    th:text="${(exchangeRates.BTC_change >= 0 ? '+' : '') + #numbers.formatDecimal(exchangeRates.BTC_change, 1, 1) + '% (24h)'}">0(24h)</span>
+                            </div>
+                        </div>
+
+                        <div class="rate-item">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span><i class="fab fa-ethereum"></i> NGN to ETH</span>
+                                <strong th:with="rate=${exchangeRates.get('ngn_eth')}"
+                                    th:text="${rate != null ? '₦' + #numbers.formatDecimal(1/rate, 1, 'COMMA', 2, 'POINT') + ' = Ξ1.00' : 'Rate unavailable'}">
+                                    ₦4,280,000 = Ξ1.00
+                                </strong>
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); text-align: right;">
+                                <span
+                                    th:class="${exchangeRates.ETH_change >= 0 ? 'positive-change' : 'negative-change'}"
+                                    th:text="${(exchangeRates.ETH_change >= 0 ? '+' : '') + #numbers.formatDecimal(exchangeRates.ETH_change, 1, 1) + '% (24h)'}">0
+                                    (24h)</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="info-row">
-                        <i class="fas fa-building-columns"></i>
-                        <div class="info-detail">
-                            <label>Bank Name</label>
-                            <span th:text="${BankName}"></span>
+                </div>
+
+
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <div class="data-card-title">Transaction History</div>
+                        <button class="data-card-action">7 Days</button>
+                    </div>
+                    <div class="transactions-chart">
+                        <canvas id="transactionsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="assets-container">
+                <!-- Trending Assets -->
+                <div class="trending-assets">
+                    <div class="assets-title">Payment Methods</div>
+                    <div class="assets-grid">
+                        <div class="asset-card">
+                            <div class="asset-change change-negative">-0.86%</div>
+                            <div class="asset-icon">
+                                <i class="fab fa-bitcoin fa-2x" style="color: #f7931a;"></i>
+                            </div>
+                            <div class="asset-value">$48,789.50</div>
+                        </div>
+                        <div class="asset-card">
+                            <div class="asset-change change-positive">+0.81%</div>
+                            <div class="asset-icon">
+                                <i class="fab fa-ethereum fa-2x" style="color: #627eea;"></i>
+                            </div>
+                            <div class="asset-value">$3,789.50</div>
+                        </div>
+                        <div class="asset-card">
+                            <div class="asset-change change-negative">-0.15%</div>
+                            <div class="asset-icon">
+                                <i class="fas fa-dollar-sign fa-2x" style="color: #ff5ea8;"></i>
+                            </div>
+                            <div class="asset-value">$28,789.50</div>
                         </div>
                     </div>
-                    <div class="info-row">
-                        <i class="fas fa-id-card"></i>
-                        <div class="info-detail">
-                            <label>User ID</label>
-                            <span th:text="${id}"></span>
-                        </div>
+                </div>
+
+                <!-- Rank Table -->
+                <div class="rank-table">
+                    <div class="assets-title">Recent Transactions</div>
+                    <div class="rank-table-header">
+                        <div class="rank-header-cell">Date</div>
+                        <div class="rank-header-cell">Amount</div>
+                        <div class="rank-header-cell">Status</div>
                     </div>
+                    <div class="rank-row transaction-row">
+                        <div>Mar 20, 2025</div>
+                        <div>$78.21</div>
+                        <div style="color: var(--accent-green);">Completed</div>
+                    </div>
+                    <div class="rank-row transaction-row">
+                        <div>Mar 19, 2025</div>
+                        <div>$45.90</div>
+                        <div style="color: var(--accent-green);">Completed</div>
+                    </div>
+                    <div class="rank-row transaction-row">
+                        <div>Mar 18, 2025</div>
+                        <div>$105.33</div>
+                        <div style="color: var(--accent-green);">Completed</div>
+                    </div>
+                    <div class="rank-row transaction-row">
+                        <div>Mar 16, 2025</div>
+                        <div>$22.50</div>
+                        <div style="color: var(--accent-red);">Failed</div>
+                    </div>
+                    <div class="rank-row transaction-row">
+                        <div>Mar 15, 2025</div>
+                        <div>$67.80</div>
+                        <div style="color: var(--accent-green);">Completed</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Links -->
+            <div class="social-links">
+                <div class="social-icon">
+                    <i class="fab fa-facebook-f"></i>
+                </div>
+                <div class="social-icon">
+                    <i class="fab fa-twitter"></i>
+                </div>
+                <div class="social-icon">
+                    <i class="fab fa-linkedin-in"></i>
                 </div>
             </div>
         </div>
     </div>
+    <div class="overlay" id="overlay"></div>
 
-        </div>
-      </div>
-      <!-- Currency Overview -->
-      <div class="currency-overview">
-        <div class="currency-card blue">
-          <div class="currency-details">
-            <div class="currency-value">USD 0.453</div>
-            <div class="currency-change negative-change">-6.81%</div>
-          </div>
-        </div>
-        <div class="currency-card purple">
-          <div class="currency-details">
-            <div class="currency-value">BTC 0.033</div>
-            <div class="currency-change positive-change">+0.12%</div>
-          </div>
-        </div>
-        <div class="currency-card red">
-          <div class="currency-details">
-            <div class="currency-value">ETH 0.333</div>
-            <div class="currency-change positive-change">+0.15%</div>
-          </div>
-        </div>
-        <!-- Currency Overview -->
-<div class="currency-overview">
-    <!-- Current Balance Card -->
-    <div class="currency-card green">
-        <div class="currency-details">
-            <div class="currency-title" style="color:black;">Current Balance</div>
-            <div class="currency-value" style="color:Black !important;">
-              <span class="Available_balance">₦0.00</span>
-            </div>
-            <div class="currency-change positive-change">
-                <i class="fas fa-arrow-up"></i>
-                <span>Updated</span>
+    <div id="logoutModal" class="modal"
+        style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7);">
+        <div class="modal-content"
+            style="background-color: #1e1e1e; margin: 15% auto; padding: 20px; border: 1px solid #333; width: 80%; max-width: 400px; border-radius: 3px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); color: #d4d4d4; font-family: 'Consolas', 'Monaco', monospace;">
+            <h3
+                style="color: #9cdcfe; margin-top: 0; font-size: 16px; border-bottom: 1px solid #333; padding-bottom: 10px;">
+                Confirm Logout</h3>
+            <p style="color: #cccccc; margin: 15px 0;">Are you sure you want to logout?</p>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button id="cancelLogout"
+                    style="padding: 6px 12px; background-color: #3a3d41; color: #cccccc; border: 1px solid #3a3d41; border-radius: 2px; cursor: pointer; font-family: 'Consolas', 'Monaco', monospace; font-size: 12px;">Cancel</button>
+                <button id="confirmLogout"
+                    style="padding: 6px 12px; background-color: #0e639c; color: white; border: 1px solid #0e639c; border-radius: 2px; cursor: pointer; font-family: 'Consolas', 'Monaco', monospace; font-size: 12px;">Yes,
+                    Logout</button>
             </div>
         </div>
     </div>
 
-    <!-- Other currency cards -->
-    <div class="currency-card blue">
-        <div class="currency-details">
-            <div class="currency-value">USD 0.453</div>
-            <div class="currency-change negative-change">-6.81%</div>
-        </div>
-    </div>
-    <!-- ... rest of the currency cards ... -->
-</div>
-      </div>
-   <!-- Exchange Rate Section -->
-   <div class="data-cards">
-    <div class="data-card">
-      <div class="data-card-header">
-        <div class="data-card-title">Exchange Rates</div>
-        <button class="data-card-action">Live</button>
-      </div>
-      
-      <div class="currency-rates">
-        <div class="rate-item">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span><i class="fas fa-naira-sign"></i> NGN to USD</span>
-             <strong th:with="rate=${exchangeRates.get('ngn_usd')}" 
-                    th:text="${rate != null ? '₦' + #numbers.formatDecimal(1/rate, 1, 'COMMA', 2, 'POINT') + ' = $1.00' : 'Rate unavailable'}">
-                ₦1,420.00 = $1.00
-            </strong>
-          </div>
-          <div style="font-size: 0.8rem; color: var(--text-secondary); text-align: right;">
-            <span th:class="${exchangeRates.USD_change >= 0 ? 'positive-change' : 'negative-change'}"
-                          th:text="${(exchangeRates.USD_change >= 0 ? '+' : '') + #numbers.formatDecimal(exchangeRates.USD_change, 1, 1) + '% (24h)'}">-2.5% (24h)</span>
-          </div>
-        </div>
-        
-        <div class="rate-item">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span><i class="fas fa-euro-sign"></i> NGN to EUR</span>
-            <strong th:with="rate=${exchangeRates.get('ngn_eur')}" 
-                    th:text="${rate != null ? '₦' + #numbers.formatDecimal(1/rate, 1, 'COMMA', 2, 'POINT') + ' = €1.00' : 'Rate unavailable'}">
-                ₦1,530.00 = €1.00
-            </strong>
-          </div>
-          <div style="font-size: 0.8rem; color: var(--text-secondary); text-align: right;">
-            <span th:class="${exchangeRates.EUR_change >= 0 ? 'positive-change' : 'negative-change'}"
-                          th:text="${(exchangeRates.EUR_change >= 0 ? '+' : '') + #numbers.formatDecimal(exchangeRates.EUR_change, 1, 1) + '% (24h)'}">0(24h)</span>
-          </div>
-        </div>
-        
-        <div class="rate-item">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span><i class="fas fa-pound-sign"></i> NGN to GBP</span>
-              <strong th:with="rate=${exchangeRates.get('ngn_gbp')}" 
-                    th:text="${rate != null ? '₦' + #numbers.formatDecimal(1/rate, 1, 'COMMA', 2, 'POINT') + ' = £1.00' : 'Rate unavailable'}">
-                ₦1,825.00 = £1.00
-              </strong>
-          </div>
-          <div style="font-size: 0.8rem; color: var(--text-secondary); text-align: right;">
-             <span th:class="${exchangeRates.GBP_change >= 0 ? 'positive-change' : 'negative-change'}"
-                          th:text="${(exchangeRates.GBP_change >= 0 ? '+' : '') + #numbers.formatDecimal(exchangeRates.GBP_change, 1, 1) + '% (24h)'}">0(24h)</span>
-          </div>
-        </div>
-        
-        <div class="rate-item">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span><i class="fab fa-bitcoin"></i> NGN to BTC</span>
-                <strong th:with="rate=${exchangeRates.get('ngn_btc')}" 
-                              th:text="${rate != null ? '₦' + #numbers.formatDecimal(1/rate, 1, 'COMMA', 2, 'POINT') + ' = ₿1.00' : 'Rate unavailable'}">
-                          ₦66,450,000 = ₿1.00
-                </strong>
-          </div>
-          <div style="font-size: 0.8rem; color: var(--text-secondary); text-align: right;">
-            <span th:class="${exchangeRates.BTC_change >= 0 ? 'positive-change' : 'negative-change'}"
-                          th:text="${(exchangeRates.BTC_change >= 0 ? '+' : '') + #numbers.formatDecimal(exchangeRates.BTC_change, 1, 1) + '% (24h)'}">0(24h)</span>
-          </div>
-        </div>
-        
-        <div class="rate-item">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span><i class="fab fa-ethereum"></i> NGN to ETH</span>
-           <strong th:with="rate=${exchangeRates.get('ngn_eth')}" 
-                    th:text="${rate != null ? '₦' + #numbers.formatDecimal(1/rate, 1, 'COMMA', 2, 'POINT') + ' = Ξ1.00' : 'Rate unavailable'}">
-                ₦4,280,000 = Ξ1.00
-            </strong>
-          </div>
-          <div style="font-size: 0.8rem; color: var(--text-secondary); text-align: right;">
-             <span th:class="${exchangeRates.ETH_change >= 0 ? 'positive-change' : 'negative-change'}"
-                          th:text="${(exchangeRates.ETH_change >= 0 ? '+' : '') + #numbers.formatDecimal(exchangeRates.ETH_change, 1, 1) + '% (24h)'}">0 (24h)</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    
-
-  <div class="data-card">
-    <div class="data-card-header">
-      <div class="data-card-title">Transaction History</div>
-      <button class="data-card-action">7 Days</button>
-    </div>
-    <div class="transactions-chart">
-      <canvas id="transactionsChart"></canvas>
-    </div>
-  </div>
-</div>
-      <div class="assets-container">
-        <!-- Trending Assets -->
-        <div class="trending-assets">
-          <div class="assets-title">Payment Methods</div>
-          <div class="assets-grid">
-            <div class="asset-card">
-              <div class="asset-change change-negative">-0.86%</div>
-              <div class="asset-icon">
-                <i class="fab fa-bitcoin fa-2x" style="color: #f7931a;"></i>
-              </div>
-              <div class="asset-value">$48,789.50</div>
+    <!-- Add this before </body> -->
+    <div class="modal fade" id="connectWalletModal" tabindex="-1" aria-labelledby="connectWalletModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="connectWalletModalLabel">Connect Your Bank Account</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="bankDetailsForm">
+                        <div class="mb-3">
+                            <label for="accountNumber" class="form-label">Account Number</label>
+                            <input name="Account_Number" type="text" class="form-control" id="accountNumber" required
+                                pattern="\d{10}" maxlength="10" placeholder="Enter 10-digit account number">
+                            <div class="invalid-feedback">
+                                Please enter a valid 10-digit account number
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="bankName" class="form-label">Bank Name</label>
+                            <select class="form-select" id="bankName" required>
+                                <option value="">Select your bank</option>
+                                <option value="ACCESS">Access Bank</option>
+                                <option value="GTB">GTBank</option>
+                                <option value="ZENITH">Zenith Bank</option>
+                                <option value="UBA">UBA</option>
+                                <option value="FIRST">First Bank</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select your bank
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveBankDetails">Connect Account</button>
+                </div>
             </div>
-            <div class="asset-card">
-              <div class="asset-change change-positive">+0.81%</div>
-              <div class="asset-icon">
-                <i class="fab fa-ethereum fa-2x" style="color: #627eea;"></i>
-              </div>
-              <div class="asset-value">$3,789.50</div>
-            </div>
-            <div class="asset-card">
-              <div class="asset-change change-negative">-0.15%</div>
-              <div class="asset-icon">
-                <i class="fas fa-dollar-sign fa-2x" style="color: #ff5ea8;"></i>
-              </div>
-              <div class="asset-value">$28,789.50</div>
-            </div>
-          </div>
         </div>
-
-        <!-- Rank Table -->
-        <div class="rank-table">
-          <div class="assets-title">Recent Transactions</div>
-          <div class="rank-table-header">
-            <div class="rank-header-cell">Date</div>
-            <div class="rank-header-cell">Amount</div>
-            <div class="rank-header-cell">Status</div>
-          </div>
-          <div class="rank-row transaction-row">
-            <div>Mar 20, 2025</div>
-            <div>$78.21</div>
-            <div style="color: var(--accent-green);">Completed</div>
-          </div>
-          <div class="rank-row transaction-row">
-            <div>Mar 19, 2025</div>
-            <div>$45.90</div>
-            <div style="color: var(--accent-green);">Completed</div>
-          </div>
-          <div class="rank-row transaction-row">
-            <div>Mar 18, 2025</div>
-            <div>$105.33</div>
-            <div style="color: var(--accent-green);">Completed</div>
-          </div>
-          <div class="rank-row transaction-row">
-            <div>Mar 16, 2025</div>
-            <div>$22.50</div>
-            <div style="color: var(--accent-red);">Failed</div>
-          </div>
-          <div class="rank-row transaction-row">
-            <div>Mar 15, 2025</div>
-            <div>$67.80</div>
-            <div style="color: var(--accent-green);">Completed</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Social Links -->
-      <div class="social-links">
-        <div class="social-icon">
-          <i class="fab fa-facebook-f"></i>
-        </div>
-        <div class="social-icon">
-          <i class="fab fa-twitter"></i>
-        </div>
-        <div class="social-icon">
-          <i class="fab fa-linkedin-in"></i>
-        </div>
-      </div>
     </div>
-  </div>
-  <div class="overlay" id="overlay"></div>
+    <script>
+        // Helper function to format numbers with commas and two decimal places
+        function formatNumberWithCommas(number) {
+            // Remove currency symbol and any commas first if it's a string
+            if (typeof number === 'string') {
+                number = number.replace(/[₦,]/g, '');
+            }
 
-  <div id="logoutModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7);">
-    <div class="modal-content" style="background-color: #1e1e1e; margin: 15% auto; padding: 20px; border: 1px solid #333; width: 80%; max-width: 400px; border-radius: 3px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); color: #d4d4d4; font-family: 'Consolas', 'Monaco', monospace;">
-      <h3 style="color: #9cdcfe; margin-top: 0; font-size: 16px; border-bottom: 1px solid #333; padding-bottom: 10px;">Confirm Logout</h3>
-      <p style="color: #cccccc; margin: 15px 0;">Are you sure you want to logout?</p>
-      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-        <button id="cancelLogout" style="padding: 6px 12px; background-color: #3a3d41; color: #cccccc; border: 1px solid #3a3d41; border-radius: 2px; cursor: pointer; font-family: 'Consolas', 'Monaco', monospace; font-size: 12px;">Cancel</button>
-        <button id="confirmLogout" style="padding: 6px 12px; background-color: #0e639c; color: white; border: 1px solid #0e639c; border-radius: 2px; cursor: pointer; font-family: 'Consolas', 'Monaco', monospace; font-size: 12px;">Yes, Logout</button>
-      </div>
-    </div>
-  </div>
+            // Parse the cleaned number
+            const numericValue = parseFloat(number);
 
-  <!-- Add this before </body> -->
-<div class="modal fade" id="connectWalletModal" tabindex="-1" aria-labelledby="connectWalletModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-      <div class="modal-content">
-          <div class="modal-header">
-              <h5 class="modal-title" id="connectWalletModalLabel">Connect Your Bank Account</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-              <form id="bankDetailsForm">
-                  <div class="mb-3">
-                      <label for="accountNumber" class="form-label">Account Number</label>
-                      <input name="Account_Number" type="text" class="form-control" id="accountNumber" 
-                             required pattern="\d{10}" maxlength="10"
-                             placeholder="Enter 10-digit account number">
-                      <div class="invalid-feedback">
-                          Please enter a valid 10-digit account number
-                      </div>
-                  </div>
-                  <div class="mb-3">
-                      <label for="bankName" class="form-label">Bank Name</label>
-                      <select class="form-select" id="bankName" required>
-                          <option value="">Select your bank</option>
-                          <option value="ACCESS">Access Bank</option>
-                          <option value="GTB">GTBank</option>
-                          <option value="ZENITH">Zenith Bank</option>
-                          <option value="UBA">UBA</option>
-                          <option value="FIRST">First Bank</option>
-                      </select>
-                      <div class="invalid-feedback">
-                          Please select your bank
-                      </div>
-                  </div>
-              </form>
-          </div>
-          <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              <button type="button" class="btn btn-primary" id="saveBankDetails">Connect Account</button>
-          </div>
-      </div>
-  </div>
-</div>
-  <script>
-// Helper function to format numbers with commas and two decimal places
-function formatNumberWithCommas(number) {
-    // Remove currency symbol and any commas first if it's a string
-    if (typeof number === 'string') {
-        number = number.replace(/[₦,]/g, '');
-    }
+            // Check if it's a valid number
+            if (isNaN(numericValue)) {
+                console.warn("Invalid number value provided for formatting:", number);
+                return "0.00"; // Return "0.00" for invalid numbers
+            }
 
-    // Parse the cleaned number
-    const numericValue = parseFloat(number);
-
-    // Check if it's a valid number
-    if (isNaN(numericValue)) {
-        console.warn("Invalid number value provided for formatting:", number);
-        return "0.00"; // Return "0.00" for invalid numbers
-    }
-
-    // Format with commas and decimals, using Nigerian locale for currency formatting
-    return numericValue.toLocaleString('en-NG', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
-}
-
-// --- DOM Content Loaded Initialization ---
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize core functionalities
-    initializeTransactionChart();
-    initializeWebSocket();
-    fetchTransactions(); // Initial fetch of transactions
-    formatAllBalanceElements(); // Ensure all balance displays are formatted on load
-
-    // Set up periodic updates for transactions
-    setInterval(fetchTransactions, 30000); // Refresh transactions every 30 seconds
-
-    // --- Event Listeners ---
-
-    // Menu Item Click Handlers
-    document.querySelectorAll('.menu-item').forEach(item => {
-        item.addEventListener('click', function() {
-            document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
-            this.classList.add('active');
-        });
-    });
-
-    // Transaction Rows (for future detail view, currently logs to console)
-    document.querySelectorAll('.transaction-row').forEach(row => {
-        row.addEventListener('click', function() {
-            console.log('Transaction details:', this.children[0].textContent, this.children[1].textContent);
-        });
-    });
-
-    // Sidebar functionality
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebar-toggle');
-    const closeSidebar = document.querySelector('.close-sidebar');
-    const overlay = document.getElementById('overlay');
-
-    function toggleSidebar() {
-        sidebar.classList.toggle('active');
-        overlay.classList.toggle('active');
-        document.body.classList.toggle('sidebar-open');
-    }
-
-    sidebarToggle.addEventListener('click', toggleSidebar);
-    closeSidebar.addEventListener('click', toggleSidebar);
-    overlay.addEventListener('click', toggleSidebar);
-
-    // Close sidebar on window resize if screen becomes large
-    window.addEventListener('resize', () => {
-        if (window.innerWidth > 768) {
-            sidebar.classList.remove('active');
-            overlay.classList.remove('active');
-            document.body.classList.remove('sidebar-open');
+            // Format with commas and decimals, using Nigerian locale for currency formatting
+            return numericValue.toLocaleString('en-NG', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
         }
-    });
 
-    // Logout functionality
-    const logoutBtn = document.querySelector('.logout');
-    const logoutModal = document.getElementById('logoutModal');
-    const cancelBtn = document.getElementById('cancelLogout');
-    const confirmBtn = document.getElementById('confirmLogout');
+        // --- DOM Content Loaded Initialization ---
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize core functionalities
+            initializeTransactionChart();
+            initializeWebSocket();
+            fetchTransactions(); // Initial fetch of transactions
+            formatAllBalanceElements(); // Ensure all balance displays are formatted on load
 
-    // Show the modal when clicking the logout button
-    logoutBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        logoutModal.style.display = 'block';
-    });
+            // Set up periodic updates for transactions
+            setInterval(fetchTransactions, 30000); // Refresh transactions every 30 seconds
 
-    // Close the modal when clicking the cancel button
-    cancelBtn.addEventListener('click', function() {
-        logoutModal.style.display = 'none';
-    });
+            // --- Event Listeners ---
 
-    // Handle logout when clicking the confirm button
-    confirmBtn.addEventListener('click', async function() {
-        // Show a subtle loading effect on the button
-        confirmBtn.innerHTML = 'Logging out...';
-        confirmBtn.style.opacity = '0.7';
-        confirmBtn.disabled = true;
-
-        try {
-            const response = await fetch('/logout', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    // Include CSRF token if your application uses it
-                    // 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                credentials: 'same-origin' // Include cookies in the request
+            // Menu Item Click Handlers
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', function () {
+                    document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                });
             });
 
-            if (response.redirected) {
-                // If the server redirects, follow the redirect
-                window.location.href = response.url;
-            } else {
-                // Otherwise redirect to login page
-                window.location.href = '/login?logout=success';
+            // Transaction Rows (for future detail view, currently logs to console)
+            document.querySelectorAll('.transaction-row').forEach(row => {
+                row.addEventListener('click', function () {
+                    console.log('Transaction details:', this.children[0].textContent, this.children[1].textContent);
+                });
+            });
+
+            // Sidebar functionality
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const closeSidebar = document.querySelector('.close-sidebar');
+            const overlay = document.getElementById('overlay');
+
+            function toggleSidebar() {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+                document.body.classList.toggle('sidebar-open');
             }
-        } catch (error) {
-            console.error('Logout error:', error);
-            window.location.href = '/login'; // Fallback to login on error
-        }
-    });
 
-    // Close the modal if the user clicks outside of it
-    window.addEventListener('click', function(event) {
-        if (event.target === logoutModal) {
-            logoutModal.style.display = 'none';
-        }
-    });
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            closeSidebar.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
 
-    // Add keyboard support (Esc to cancel, Enter to confirm)
-    document.addEventListener('keydown', function(e) {
-        if (logoutModal.style.display === 'block') {
-            if (e.key === 'Escape') {
+            // Close sidebar on window resize if screen becomes large
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                    document.body.classList.remove('sidebar-open');
+                }
+            });
+
+            // Logout functionality
+            const logoutBtn = document.querySelector('.logout');
+            const logoutModal = document.getElementById('logoutModal');
+            const cancelBtn = document.getElementById('cancelLogout');
+            const confirmBtn = document.getElementById('confirmLogout');
+
+            // Show the modal when clicking the logout button
+            logoutBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                logoutModal.style.display = 'block';
+            });
+
+            // Close the modal when clicking the cancel button
+            cancelBtn.addEventListener('click', function () {
                 logoutModal.style.display = 'none';
-            } else if (e.key === 'Enter') {
-                confirmBtn.click();
-            }
-        }
-    });
-
-    // Connect wallet functionality
-    const connectWalletBtn = document.querySelector('.connect-wallet');
-    const saveBankDetailsBtn = document.getElementById('saveBankDetails');
-    const bankDetailsForm = document.getElementById('bankDetailsForm');
-    // Ensure Bootstrap's Modal is available
-    const connectWalletModal = new bootstrap.Modal(document.getElementById('connectWalletModal'));
-
-    // Show modal when clicking connect wallet button
-    connectWalletBtn.addEventListener('click', function() {
-        connectWalletModal.show();
-    });
-
-    // Handle form submission for connecting wallet
-    saveBankDetailsBtn.addEventListener('click', async function() {
-        const form = document.getElementById('bankDetailsForm');
-        const accountNumber = document.getElementById('accountNumber').value;
-        const bankName = document.getElementById('bankName').value;
-
-        if (!form.checkValidity()) {
-            form.classList.add('was-validated');
-            return;
-        }
-
-        try {
-            saveBankDetailsBtn.disabled = true;
-            saveBankDetailsBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Connecting...';
-
-            const response = await fetch('/user/update-bank-details', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `accountNumber=${accountNumber}&bankName=${bankName}`
             });
 
-            if (response.ok) {
-                // Show success message
-                connectWalletBtn.innerHTML = '<i class="fas fa-check-circle"></i> Account Connected';
-                connectWalletBtn.classList.add('connected');
-                connectWalletModal.hide();
-                alert('Bank account connected successfully!'); // Consider a more user-friendly toast notification
-            } else {
-                throw new Error('Failed to connect bank account');
-            }
-        } catch (error) {
-            alert('Error connecting bank account: ' + error.message);
-        } finally {
-            saveBankDetailsBtn.disabled = false;
-            saveBankDetailsBtn.innerHTML = 'Connect Account';
-        }
-    });
+            // Handle logout when clicking the confirm button
+            confirmBtn.addEventListener('click', async function () {
+                // Show a subtle loading effect on the button
+                confirmBtn.innerHTML = 'Logging out...';
+                confirmBtn.style.opacity = '0.7';
+                confirmBtn.disabled = true;
 
-    // Reset form validation when modal is hidden
-    document.getElementById('connectWalletModal').addEventListener('hidden.bs.modal', function() {
-        bankDetailsForm.classList.remove('was-validated');
-    });
+                try {
+                    const response = await fetch('/logout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            // Include CSRF token if your application uses it
+                            // 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        credentials: 'same-origin' // Include cookies in the request
+                    });
 
-    // Intercept all fetch/ajax calls for session expiration
-    const originalFetch = window.fetch;
-    window.fetch = function() {
-        return originalFetch.apply(this, arguments)
-            .then(response => {
-                if (response.status === 401) {
-                    // Check if session expired (assuming server sends a custom header)
-                    const sessionExpired = response.headers.get('X-Session-Expired');
-                    if (sessionExpired) {
-                        window.location.href = '/login';
+                    if (response.redirected) {
+                        // If the server redirects, follow the redirect
+                        window.location.href = response.url;
+                    } else {
+                        // Otherwise redirect to login page
+                        window.location.href = '/login?logout=success';
+                    }
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    window.location.href = '/login'; // Fallback to login on error
+                }
+            });
+
+            // Close the modal if the user clicks outside of it
+            window.addEventListener('click', function (event) {
+                if (event.target === logoutModal) {
+                    logoutModal.style.display = 'none';
+                }
+            });
+
+            // Add keyboard support (Esc to cancel, Enter to confirm)
+            document.addEventListener('keydown', function (e) {
+                if (logoutModal.style.display === 'block') {
+                    if (e.key === 'Escape') {
+                        logoutModal.style.display = 'none';
+                    } else if (e.key === 'Enter') {
+                        confirmBtn.click();
                     }
                 }
-                return response;
             });
-    };
 
-    // Listen for custom balance update event
-    window.addEventListener('balanceUpdate', function(event) {
-        const balanceElements = document.querySelectorAll('.Available_balance');
-        balanceElements.forEach(element => {
-            if (element) {
-                element.textContent = `₦${formatNumberWithCommas(event.detail.balance)}`;
+            // Connect wallet functionality
+            const connectWalletBtn = document.querySelector('.connect-wallet');
+            const saveBankDetailsBtn = document.getElementById('saveBankDetails');
+            const bankDetailsForm = document.getElementById('bankDetailsForm');
+            // Ensure Bootstrap's Modal is available
+            const connectWalletModal = new bootstrap.Modal(document.getElementById('connectWalletModal'));
+
+            // Show modal when clicking connect wallet button
+            connectWalletBtn.addEventListener('click', function () {
+                connectWalletModal.show();
+            });
+
+            // Handle form submission for connecting wallet
+            saveBankDetailsBtn.addEventListener('click', async function () {
+                const form = document.getElementById('bankDetailsForm');
+                const accountNumber = document.getElementById('accountNumber').value;
+                const bankName = document.getElementById('bankName').value;
+
+                if (!form.checkValidity()) {
+                    form.classList.add('was-validated');
+                    return;
+                }
+
+                try {
+                    saveBankDetailsBtn.disabled = true;
+                    saveBankDetailsBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Connecting...';
+
+                    const response = await fetch('/user/update-bank-details', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `accountNumber=${accountNumber}&bankName=${bankName}`
+                    });
+
+                    if (response.ok) {
+                        // Show success message
+                        connectWalletBtn.innerHTML = '<i class="fas fa-check-circle"></i> Account Connected';
+                        connectWalletBtn.classList.add('connected');
+                        connectWalletModal.hide();
+                        alert('Bank account connected successfully!'); // Consider a more user-friendly toast notification
+                    } else {
+                        throw new Error('Failed to connect bank account');
+                    }
+                } catch (error) {
+                    alert('Error connecting bank account: ' + error.message);
+                } finally {
+                    saveBankDetailsBtn.disabled = false;
+                    saveBankDetailsBtn.innerHTML = 'Connect Account';
+                }
+            });
+
+            // Reset form validation when modal is hidden
+            document.getElementById('connectWalletModal').addEventListener('hidden.bs.modal', function () {
+                bankDetailsForm.classList.remove('was-validated');
+            });
+
+            // Intercept all fetch/ajax calls for session expiration
+            const originalFetch = window.fetch;
+            window.fetch = function () {
+                return originalFetch.apply(this, arguments)
+                    .then(response => {
+                        if (response.status === 401) {
+                            // Check if session expired (assuming server sends a custom header)
+                            const sessionExpired = response.headers.get('X-Session-Expired');
+                            if (sessionExpired) {
+                                window.location.href = '/login';
+                            }
+                        }
+                        return response;
+                    });
+            };
+
+            // Listen for custom balance update event
+            window.addEventListener('balanceUpdate', function (event) {
+                const balanceElements = document.querySelectorAll('.Available_balance');
+                balanceElements.forEach(element => {
+                    if (element) {
+                        element.textContent = `₦${formatNumberWithCommas(event.detail.balance)}`;
+                    }
+                });
+            });
+
+            // Check for stored balance on page load and format it
+            const storedBalance = localStorage.getItem('userBalance');
+            if (storedBalance) {
+                const balanceElements = document.querySelectorAll('.Available_balance');
+                balanceElements.forEach(element => {
+                    if (element) {
+                        element.textContent = `₦${formatNumberWithCommas(parseFloat(storedBalance))}`;
+                    }
+                });
             }
+
+            // Handle loading overlay for initial page load
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const content = document.querySelector('.content');
+
+            // Show loading screen immediately
+            loadingOverlay.style.display = 'flex';
+
+            // Wait for everything to load
+            window.addEventListener('load', () => {
+                // Small delay to ensure smooth transition
+                setTimeout(() => {
+                    // Hide loading screen
+                    loadingOverlay.classList.add('hidden');
+
+                    // Show content
+                    content.classList.add('visible');
+
+                    // Clean up loading overlay after animation
+                    setTimeout(() => {
+                        loadingOverlay.style.display = 'none';
+                    }, 500); // Match the CSS transition duration
+                }, 300);
+            });
         });
-    });
 
-    // Check for stored balance on page load and format it
-    const storedBalance = localStorage.getItem('userBalance');
-    if (storedBalance) {
-        const balanceElements = document.querySelectorAll('.Available_balance');
-        balanceElements.forEach(element => {
-            if (element) {
-                element.textContent = `₦${formatNumberWithCommas(parseFloat(storedBalance))}`;
-            }
-        });
-    }
+        // --- Chart and Data Fetching Functions ---
 
-    // Handle loading overlay for initial page load
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    const content = document.querySelector('.content');
+        /**
+         * Initializes the transaction chart using Chart.js.
+         * Fetches initial data and sets up periodic updates.
+         */
+        async function initializeTransactionChart() {
+            try {
+                const chartData = await fetchChartData();
 
-    // Show loading screen immediately
-    loadingOverlay.style.display = 'flex';
-
-    // Wait for everything to load
-    window.addEventListener('load', () => {
-        // Small delay to ensure smooth transition
-        setTimeout(() => {
-            // Hide loading screen
-            loadingOverlay.classList.add('hidden');
-
-            // Show content
-            content.classList.add('visible');
-
-            // Clean up loading overlay after animation
-            setTimeout(() => {
-                loadingOverlay.style.display = 'none';
-            }, 500); // Match the CSS transition duration
-        }, 300);
-    });
-});
-
-// --- Chart and Data Fetching Functions ---
-
-/**
- * Initializes the transaction chart using Chart.js.
- * Fetches initial data and sets up periodic updates.
- */
-async function initializeTransactionChart() {
-    try {
-        const chartData = await fetchChartData();
-
-        const ctx = document.getElementById('transactionsChart').getContext('2d');
-        const transactionsChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: chartData.labels,
-                datasets: [{
-                    label: 'Transaction Volume',
-                    data: chartData.data,
-                    backgroundColor: 'rgba(58, 128, 233, 0.1)',
-                    borderColor: '#3a80e9',
-                    tension: 0.4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
+                const ctx = document.getElementById('transactionsChart').getContext('2d');
+                const transactionsChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{
+                            label: 'Transaction Volume',
+                            data: chartData.data,
+                            backgroundColor: 'rgba(58, 128, 233, 0.1)',
+                            borderColor: '#3a80e9',
+                            tension: 0.4,
+                            fill: true
+                        }]
                     },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `₦${formatNumberWithCommas(context.raw)}`;
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return `₦${formatNumberWithCommas(context.raw)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    display: true,
+                                    color: 'rgba(255, 255, 255, 0.05)'
+                                },
+                                ticks: {
+                                    color: '#a0a0a0',
+                                    callback: function (value) {
+                                        return '₦' + formatNumberWithCommas(value);
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: '#a0a0a0'
+                                }
                             }
                         }
                     }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            display: true,
-                            color: 'rgba(255, 255, 255, 0.05)'
-                        },
-                        ticks: {
-                            color: '#a0a0a0',
-                            callback: function(value) {
-                                return '₦' + formatNumberWithCommas(value);
-                            }
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            color: '#a0a0a0'
-                        }
+                });
+
+                // Update chart periodically
+                setInterval(async () => {
+                    const newData = await fetchChartData();
+                    transactionsChart.data.labels = newData.labels;
+                    transactionsChart.data.datasets[0].data = newData.data;
+                    transactionsChart.update();
+                }, 300000); // Update every 5 minutes
+            } catch (error) {
+                console.error('Error initializing transaction chart:', error);
+            }
+        }
+
+        /**
+         * Fetches transaction chart data from the server.
+         * @returns {Promise<Object>} A promise that resolves to the chart data (labels and data).
+         */
+        async function fetchChartData() {
+            try {
+                const response = await fetch('/user/transaction-chart-data', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
                     }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching chart data:', error);
+                return {
+                    labels: [],
+                    data: []
+                }; // Return empty data on error
             }
-        });
-
-        // Update chart periodically
-        setInterval(async () => {
-            const newData = await fetchChartData();
-            transactionsChart.data.labels = newData.labels;
-            transactionsChart.data.datasets[0].data = newData.data;
-            transactionsChart.update();
-        }, 300000); // Update every 5 minutes
-    } catch (error) {
-        console.error('Error initializing transaction chart:', error);
-    }
-}
-
-/**
- * Fetches transaction chart data from the server.
- * @returns {Promise<Object>} A promise that resolves to the chart data (labels and data).
- */
-async function fetchChartData() {
-    try {
-        const response = await fetch('/user/transaction-chart-data', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return await response.json();
-    } catch (error) {
-        console.error('Error fetching chart data:', error);
-        return {
-            labels: [],
-            data: []
-        }; // Return empty data on error
-    }
-}
-
-/**
- * Fetches and displays recent transactions and updates the balance card.
- */
-async function fetchTransactions() {
-    try {
-        const response = await fetch('/user/transactions?limit=5', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
-        updateTransactionTable(data.transactions);
-        updateBalanceCard(data);
-    } catch (error) {
-        console.error('Error fetching transactions:', error);
-    }
-}
+        /**
+         * Fetches and displays recent transactions and updates the balance card.
+         */
+        async function fetchTransactions() {
+            try {
+                const response = await fetch('/user/transactions?limit=5', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
 
-/**
- * Updates the transaction table with new transaction data, including animations.
- * @param {Array<Object>} transactions - An array of transaction objects.
- */
-function updateTransactionTable(transactions) {
-    const tableBody = document.querySelector('.rank-table');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
 
-    // Clear existing rows except header for a clean update
-    const headerHtml = `
+                const data = await response.json();
+                updateTransactionTable(data.transactions);
+                updateBalanceCard(data);
+            } catch (error) {
+                console.error('Error fetching transactions:', error);
+            }
+        }
+
+        /**
+         * Updates the transaction table with new transaction data, including animations.
+         * @param {Array<Object>} transactions - An array of transaction objects.
+         */
+        function updateTransactionTable(transactions) {
+            const tableBody = document.querySelector('.rank-table');
+
+            // Clear existing rows except header for a clean update
+            const headerHtml = `
         <div class="assets-title">Recent Transactions</div>
         <div class="rank-table-header">
             <div class="rank-header-cell">Date</div>
@@ -845,8 +856,8 @@ function updateTransactionTable(transactions) {
         </div>
     `;
 
-    // Map transactions to HTML, formatting amounts and colors
-    const transactionsHtml = transactions.map(transaction => `
+            // Map transactions to HTML, formatting amounts and colors
+            const transactionsHtml = transactions.map(transaction => `
         <div class="rank-row transaction-row">
             <div>${transaction.timestamp}</div>
             <div class="${transaction.type.toLowerCase()}-amount">
@@ -858,37 +869,37 @@ function updateTransactionTable(transactions) {
         </div>
     `).join('');
 
-    tableBody.innerHTML = headerHtml + transactionsHtml;
+            tableBody.innerHTML = headerHtml + transactionsHtml;
 
-    // Re-attach event listeners to new transaction rows if needed for detail view
-    document.querySelectorAll('.transaction-row').forEach(row => {
-        row.addEventListener('click', function() {
-            console.log('Transaction details:', this.children[0].textContent, this.children[1].textContent);
-        });
-    });
-}
+            // Re-attach event listeners to new transaction rows if needed for detail view
+            document.querySelectorAll('.transaction-row').forEach(row => {
+                row.addEventListener('click', function () {
+                    console.log('Transaction details:', this.children[0].textContent, this.children[1].textContent);
+                });
+            });
+        }
 
-/**
- * Updates the transaction table with a single new transaction, applying animations.
- * @param {Object} newTransaction - The new transaction object to add.
- */
-function updateTransactionTableWithAnimation(newTransaction) {
-    const tableBody = document.querySelector('.rank-table');
-    const rows = tableBody.querySelectorAll('.transaction-row');
+        /**
+         * Updates the transaction table with a single new transaction, applying animations.
+         * @param {Object} newTransaction - The new transaction object to add.
+         */
+        function updateTransactionTableWithAnimation(newTransaction) {
+            const tableBody = document.querySelector('.rank-table');
+            const rows = tableBody.querySelectorAll('.transaction-row');
 
-    // Remove the last row with animation if there are 5 or more rows
-    if (rows.length >= 5) {
-        const lastRow = rows[rows.length - 1];
-        lastRow.style.animation = 'slideOutRight 0.5s forwards'; // 'forwards' keeps the end state
-        setTimeout(() => lastRow.remove(), 500);
-    }
+            // Remove the last row with animation if there are 5 or more rows
+            if (rows.length >= 5) {
+                const lastRow = rows[rows.length - 1];
+                lastRow.style.animation = 'slideOutRight 0.5s forwards'; // 'forwards' keeps the end state
+                setTimeout(() => lastRow.remove(), 500);
+            }
 
-    // Create and add new row with animation
-    const newRow = document.createElement('div');
-    newRow.className = 'rank-row transaction-row';
-    newRow.style.animation = 'slideInLeft 0.5s';
+            // Create and add new row with animation
+            const newRow = document.createElement('div');
+            newRow.className = 'rank-row transaction-row';
+            newRow.style.animation = 'slideInLeft 0.5s';
 
-    newRow.innerHTML = `
+            newRow.innerHTML = `
         <div>${newTransaction.timestamp}</div>
         <div class="${newTransaction.type.toLowerCase()}-amount">
             ${newTransaction.type === 'INCOMING' ? '+' : '-'}₦${formatNumberWithCommas(newTransaction.amount)}
@@ -898,197 +909,197 @@ function updateTransactionTableWithAnimation(newTransaction) {
         </div>
     `;
 
-    // Insert new row at the top (after the header)
-    const header = tableBody.querySelector('.rank-table-header');
-    header.insertAdjacentElement('afterend', newRow);
+            // Insert new row at the top (after the header)
+            const header = tableBody.querySelector('.rank-table-header');
+            header.insertAdjacentElement('afterend', newRow);
 
-    // Show notification for incoming transactions
-    if (newTransaction.type === 'INCOMING') {
-        showTransactionNotification(newTransaction);
-    }
-}
-
-/**
- * Updates the balance display on the balance card.
- * @param {Object} data - Object containing the balance.
- */
-function updateBalanceCard(data) {
-    const balanceElement = document.querySelector('.Available_balance');
-    if (balanceElement && data.balance !== undefined) {
-        const rawBalance = String(data.balance).replace(/[₦,]/g, ''); // Ensure string and clean
-        const formattedBalance = formatNumberWithCommas(rawBalance);
-        balanceElement.textContent = `₦${formattedBalance}`;
-    }
-}
-
-/**
- * Fetches and updates the user's balance.
- * Stores the balance in localStorage and dispatches a custom event.
- * @returns {Promise<number>} A promise that resolves to the numeric balance.
- */
-async function updateUserBalance() {
-    try {
-        const response = await fetch('/user/balance', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        const numericBalance = parseFloat(data.balance);
-
-        if (isNaN(numericBalance)) {
-            console.error("Server returned non-numeric balance:", data.balance);
-            return 0.00; // Return 0 for invalid balance
-        }
-
-        localStorage.setItem('userBalance', numericBalance); // Update balance in localStorage
-        // Dispatch custom event for balance update
-        const balanceUpdateEvent = new CustomEvent('balanceUpdate', {
-            detail: {
-                balance: numericBalance
-            }
-        });
-        window.dispatchEvent(balanceUpdateEvent);
-
-        return numericBalance;
-    } catch (error) {
-        console.error('Error fetching updated balance:', error);
-        return 0.00; // Return 0 on error
-    }
-}
-
-/**
- * Applies number formatting to all elements with balance-related classes.
- */
-function formatAllBalanceElements() {
-    // Select both inconsistent class names
-    const balanceElements = document.querySelectorAll('.Available_balance');
-
-    balanceElements.forEach(element => {
-        if (element.textContent) {
-            // Get the raw value, removing currency symbols and commas
-            let rawValue = element.textContent.replace(/[₦,]/g, '');
-            if (!isNaN(parseFloat(rawValue))) {
-                element.textContent = `₦${formatNumberWithCommas(rawValue)}`;
-            } else {
-                // If initial content is not a valid number, try fetching from server
-                updateUserBalance(); // This will trigger a balanceUpdate event
+            // Show notification for incoming transactions
+            if (newTransaction.type === 'INCOMING') {
+                showTransactionNotification(newTransaction);
             }
         }
-    });
-}
 
-
-/**
- * Handles payment processing (placeholder for actual implementation).
- * Updates balance and shows notifications after successful payment.
- * @param {Object} paymentData - Data related to the payment.
- */
-async function processPayment(paymentData) {
-    // ... existing payment processing code ...
-    // This function seems to be incomplete in the provided snippet.
-    // Assuming 'response' and 'result' are defined from an API call
-    try {
-        // Example: Simulating a fetch call
-        const response = await fetch('/api/process-payment', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(paymentData)
-        });
-
-        const result = await response.json();
-
-        if (response.ok && result.status === 'SUCCESS') {
-            await updateUserBalance(); // Update balance immediately after successful transaction
-            showSuccessMessage('Payment successful!'); // Placeholder for success message
-            // html5QrCode.clear(); // If QR scanner is used
-            // resetScannerUI(); // If scanner UI needs resetting
-        } else {
-            throw new Error(result.message || 'Payment failed');
+        /**
+         * Updates the balance display on the balance card.
+         * @param {Object} data - Object containing the balance.
+         */
+        function updateBalanceCard(data) {
+            const balanceElement = document.querySelector('.Available_balance');
+            if (balanceElement && data.balance !== undefined) {
+                const rawBalance = String(data.balance).replace(/[₦,]/g, ''); // Ensure string and clean
+                const formattedBalance = formatNumberWithCommas(rawBalance);
+                balanceElement.textContent = `₦${formattedBalance}`;
+            }
         }
-    } catch (error) {
-        console.error('Payment processing error:', error);
-        showErrorMessage('Payment failed: ' + error.message); // Placeholder for error message
-    }
-}
 
-// --- WebSocket Functionality ---
-
-/**
- * Initializes WebSocket connection for real-time transaction updates.
- * Subscribes to personal transaction topics and handles incoming messages.
- */
-function initializeWebSocket() {
-    // Ensure SockJS and Stomp are loaded before calling this function
-    if (typeof SockJS === 'undefined' || typeof Stomp === 'undefined') {
-        console.error('SockJS or Stomp.js libraries are not loaded. WebSocket cannot be initialized.');
-        return;
-    }
-
-    const socket = new SockJS('/ws');
-    const stompClient = Stomp.over(socket);
-
-    // Get user ID from meta tag
-    const userIdMeta = document.querySelector('meta[name="user-id"]');
-    if (!userIdMeta) {
-        console.error('Meta tag with name "user-id" not found. Cannot subscribe to user-specific transactions.');
-        return;
-    }
-    const userId = userIdMeta.content;
-
-    stompClient.connect({}, function(frame) {
-        console.log('Connected to WebSocket:', frame);
-
-        // Subscribe to personal transaction updates
-        stompClient.subscribe('/topic/transactions/' + userId, function(message) {
+        /**
+         * Fetches and updates the user's balance.
+         * Stores the balance in localStorage and dispatches a custom event.
+         * @returns {Promise<number>} A promise that resolves to the numeric balance.
+         */
+        async function updateUserBalance() {
             try {
-                const transaction = JSON.parse(message.body);
-                updateTransactionTableWithAnimation(transaction);
+                const response = await fetch('/user/balance', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
 
-                // Show notification for incoming transactions and update balance
-                if (transaction.type === 'INCOMING') {
-                    showTransactionNotification(transaction);
-                    updateUserBalance(); // Fetch latest balance after incoming transaction
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-            } catch (e) {
-                console.error('Error parsing WebSocket message:', e, message.body);
+
+                const data = await response.json();
+                const numericBalance = parseFloat(data.balance);
+
+                if (isNaN(numericBalance)) {
+                    console.error("Server returned non-numeric balance:", data.balance);
+                    return 0.00; // Return 0 for invalid balance
+                }
+
+                localStorage.setItem('userBalance', numericBalance); // Update balance in localStorage
+                // Dispatch custom event for balance update
+                const balanceUpdateEvent = new CustomEvent('balanceUpdate', {
+                    detail: {
+                        balance: numericBalance
+                    }
+                });
+                window.dispatchEvent(balanceUpdateEvent);
+
+                return numericBalance;
+            } catch (error) {
+                console.error('Error fetching updated balance:', error);
+                return 0.00; // Return 0 on error
             }
-        });
-    }, function(error) {
-        console.error('WebSocket connection error:', error);
-        // Attempt to reconnect after a delay
-        setTimeout(initializeWebSocket, 5000);
-    });
+        }
 
-    return stompClient;
-}
+        /**
+         * Applies number formatting to all elements with balance-related classes.
+         */
+        function formatAllBalanceElements() {
+            // Select both inconsistent class names
+            const balanceElements = document.querySelectorAll('.Available_balance');
+
+            balanceElements.forEach(element => {
+                if (element.textContent) {
+                    // Get the raw value, removing currency symbols and commas
+                    let rawValue = element.textContent.replace(/[₦,]/g, '');
+                    if (!isNaN(parseFloat(rawValue))) {
+                        element.textContent = `₦${formatNumberWithCommas(rawValue)}`;
+                    } else {
+                        // If initial content is not a valid number, try fetching from server
+                        updateUserBalance(); // This will trigger a balanceUpdate event
+                    }
+                }
+            });
+        }
 
 
-// --- Notification and UI Helper Functions ---
+        /**
+         * Handles payment processing (placeholder for actual implementation).
+         * Updates balance and shows notifications after successful payment.
+         * @param {Object} paymentData - Data related to the payment.
+         */
+        async function processPayment(paymentData) {
+            // ... existing payment processing code ...
+            // This function seems to be incomplete in the provided snippet.
+            // Assuming 'response' and 'result' are defined from an API call
+            try {
+                // Example: Simulating a fetch call
+                const response = await fetch('/api/process-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(paymentData)
+                });
 
-/**
- * Displays a transaction notification (e.g., for incoming funds).
- * @param {Object} transaction - The transaction object to display.
- */
-function showTransactionNotification(transaction) {
-    let notificationContainer = document.getElementById('notification-container');
-    if (!notificationContainer) {
-        notificationContainer = document.createElement('div');
-        notificationContainer.id = 'notification-container';
-        document.body.appendChild(notificationContainer);
-    }
+                const result = await response.json();
 
-    const notification = document.createElement('div');
-    notification.className = 'transaction-notification';
-    notification.innerHTML = `
+                if (response.ok && result.status === 'SUCCESS') {
+                    await updateUserBalance(); // Update balance immediately after successful transaction
+                    showSuccessMessage('Payment successful!'); // Placeholder for success message
+                    // html5QrCode.clear(); // If QR scanner is used
+                    // resetScannerUI(); // If scanner UI needs resetting
+                } else {
+                    throw new Error(result.message || 'Payment failed');
+                }
+            } catch (error) {
+                console.error('Payment processing error:', error);
+                showErrorMessage('Payment failed: ' + error.message); // Placeholder for error message
+            }
+        }
+
+        // --- WebSocket Functionality ---
+
+        /**
+         * Initializes WebSocket connection for real-time transaction updates.
+         * Subscribes to personal transaction topics and handles incoming messages.
+         */
+        function initializeWebSocket() {
+            // Ensure SockJS and Stomp are loaded before calling this function
+            if (typeof SockJS === 'undefined' || typeof Stomp === 'undefined') {
+                console.error('SockJS or Stomp.js libraries are not loaded. WebSocket cannot be initialized.');
+                return;
+            }
+
+            const socket = new SockJS('/ws');
+            const stompClient = Stomp.over(socket);
+
+            // Get user ID from meta tag
+            const userIdMeta = document.querySelector('meta[name="user-id"]');
+            if (!userIdMeta) {
+                console.error('Meta tag with name "user-id" not found. Cannot subscribe to user-specific transactions.');
+                return;
+            }
+            const userId = userIdMeta.content;
+
+            stompClient.connect({}, function (frame) {
+                console.log('Connected to WebSocket:', frame);
+
+                // Subscribe to personal transaction updates
+                stompClient.subscribe('/topic/transactions/' + userId, function (message) {
+                    try {
+                        const transaction = JSON.parse(message.body);
+                        updateTransactionTableWithAnimation(transaction);
+
+                        // Show notification for incoming transactions and update balance
+                        if (transaction.type === 'INCOMING') {
+                            showTransactionNotification(transaction);
+                            updateUserBalance(); // Fetch latest balance after incoming transaction
+                        }
+                    } catch (e) {
+                        console.error('Error parsing WebSocket message:', e, message.body);
+                    }
+                });
+            }, function (error) {
+                console.error('WebSocket connection error:', error);
+                // Attempt to reconnect after a delay
+                setTimeout(initializeWebSocket, 5000);
+            });
+
+            return stompClient;
+        }
+
+
+        // --- Notification and UI Helper Functions ---
+
+        /**
+         * Displays a transaction notification (e.g., for incoming funds).
+         * @param {Object} transaction - The transaction object to display.
+         */
+        function showTransactionNotification(transaction) {
+            let notificationContainer = document.getElementById('notification-container');
+            if (!notificationContainer) {
+                notificationContainer = document.createElement('div');
+                notificationContainer.id = 'notification-container';
+                document.body.appendChild(notificationContainer);
+            }
+
+            const notification = document.createElement('div');
+            notification.className = 'transaction-notification';
+            notification.innerHTML = `
         <div class="notification-content">
             <i class="fas fa-money-bill-wave"></i>
             <div class="notification-text">
@@ -1099,65 +1110,66 @@ function showTransactionNotification(transaction) {
         </div>
     `;
 
-    notificationContainer.appendChild(notification);
+            notificationContainer.appendChild(notification);
 
-    // Add close button functionality
-    const closeBtn = notification.querySelector('.notification-close');
-    closeBtn.onclick = () => {
-        notification.style.animation = 'slideOutRight 0.5s forwards';
-        setTimeout(() => notification.remove(), 500);
-    };
+            // Add close button functionality
+            const closeBtn = notification.querySelector('.notification-close');
+            closeBtn.onclick = () => {
+                notification.style.animation = 'slideOutRight 0.5s forwards';
+                setTimeout(() => notification.remove(), 500);
+            };
 
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        if (notification.parentNode) { // Check if element still exists before trying to animate/remove
-            notification.style.animation = 'slideOutRight 0.5s forwards';
-            setTimeout(() => notification.remove(), 500);
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) { // Check if element still exists before trying to animate/remove
+                    notification.style.animation = 'slideOutRight 0.5s forwards';
+                    setTimeout(() => notification.remove(), 500);
+                }
+            }, 5000);
         }
-    }, 5000);
-}
 
-/**
- * Placeholder for showing a success message (e.g., a toast or alert).
- * @param {string} message - The success message to display.
- */
-function showSuccessMessage(message) {
-    console.log("SUCCESS:", message);
-    // In a real application, you'd use a more sophisticated notification system (e.g., Toastify, SweetAlert)
-    // alert(message);
-}
-
-/**
- * Placeholder for showing an error message (e.g., a toast or alert).
- * @param {string} message - The error message to display.
- */
-function showErrorMessage(message) {
-    console.error("ERROR:", message);
-    // In a real application, you'd use a more sophisticated error display
-    // alert(message);
-}
-
-/**
- * This function seems redundant given `formatAllBalanceElements` and `updateUserBalance`.
- * It attempts to fix current balance display by re-formatting and fetching if invalid.
- * It's generally better to have a single source of truth for balance updates.
- */
-function fixCurrentBalanceDisplay() {
-    console.log("Attempting to fix balance display for consistency.");
-
-    const balanceElements = document.querySelectorAll('.Available_balance');
-
-    balanceElements.forEach(element => {
-        let rawValue = element.textContent.replace(/[^0-9.]/g, '');
-
-        if (rawValue && !isNaN(parseFloat(rawValue))) {
-            element.textContent = `₦${formatNumberWithCommas(rawValue)}`;
-        } else {
-            console.log("Invalid initial balance detected, fetching latest balance.");
-            updateUserBalance(); // This will trigger a 'balanceUpdate' event
+        /**
+         * Placeholder for showing a success message (e.g., a toast or alert).
+         * @param {string} message - The success message to display.
+         */
+        function showSuccessMessage(message) {
+            console.log("SUCCESS:", message);
+            // In a real application, you'd use a more sophisticated notification system (e.g., Toastify, SweetAlert)
+            // alert(message);
         }
-    });
-}
-</script>
+
+        /**
+         * Placeholder for showing an error message (e.g., a toast or alert).
+         * @param {string} message - The error message to display.
+         */
+        function showErrorMessage(message) {
+            console.error("ERROR:", message);
+            // In a real application, you'd use a more sophisticated error display
+            // alert(message);
+        }
+
+        /**
+         * This function seems redundant given `formatAllBalanceElements` and `updateUserBalance`.
+         * It attempts to fix current balance display by re-formatting and fetching if invalid.
+         * It's generally better to have a single source of truth for balance updates.
+         */
+        function fixCurrentBalanceDisplay() {
+            console.log("Attempting to fix balance display for consistency.");
+
+            const balanceElements = document.querySelectorAll('.Available_balance');
+
+            balanceElements.forEach(element => {
+                let rawValue = element.textContent.replace(/[^0-9.]/g, '');
+
+                if (rawValue && !isNaN(parseFloat(rawValue))) {
+                    element.textContent = `₦${formatNumberWithCommas(rawValue)}`;
+                } else {
+                    console.log("Invalid initial balance detected, fetching latest balance.");
+                    updateUserBalance(); // This will trigger a 'balanceUpdate' event
+                }
+            });
+        }
+    </script>
 </body>
+
 </html>
