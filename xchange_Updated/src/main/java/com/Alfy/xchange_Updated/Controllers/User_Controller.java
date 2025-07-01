@@ -334,7 +334,7 @@ public ResponseEntity<?> getUserTransactions(
                 dto.put("otherPartyUsername", otherParty.getUsername());
                 
                 return dto;
-            })
+            })  
             .collect(Collectors.toList());
 
         // Build response

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,20 +12,16 @@
     <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
     <script th:src="@{/js/loading.js}" defer></script>
 </head>
+
 <body>
-      <div class="loading-overlay" id="loadingOverlay">
-        <dotlottie-player 
-            src="https://lottie.host/dea15329-3deb-4041-befb-1a46439a9296/1sy2yaIuNl.lottie"
-            background="transparent"
-            speed="1"
-            style="width: 200px; height: 200px;"
-            loop
-            autoplay>
+    <div class="loading-overlay" id="loadingOverlay">
+        <dotlottie-player src="https://lottie.host/dea15329-3deb-4041-befb-1a46439a9296/1sy2yaIuNl.lottie"
+            background="transparent" speed="1" style="width: 200px; height: 200px;" loop autoplay>
         </dotlottie-player>
         <p class="loading-text">Loading...</p>
     </div>
     <!-- Navigation -->
-      <nav class="navbar navbar-expand navbar-dark fixed-top" style="background-color: transparent;">
+    <nav class="navbar navbar-expand navbar-dark fixed-top" style="background-color: transparent;">
         <div class="container">
             <a class="navbar-brand fade-in" th:href="@{/}">
                 <i class="fas fa-qrcode me-2"></i>XChange
@@ -68,12 +65,13 @@
                                     </div>
                                     <div class="error-message"></div>
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <label for="password" class="form-label">Password</label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                        <input type="password" class="form-control" id="password" name="password" required>
+                                        <input type="password" class="form-control" id="password" name="password"
+                                            required>
                                         <button class="btn btn-outline-secondary" type="button" id="togglePassword">
                                             <i class="fas fa-eye"></i>
                                         </button>
@@ -85,8 +83,10 @@
                                     <label for="confirmPassword" class="form-label">Confirm Password</label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
-                                        <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword" style="border: none;">
+                                        <input type="password" class="form-control" id="confirmPassword"
+                                            name="confirmPassword" required>
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            id="toggleConfirmPassword" style="border: none;">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
@@ -117,62 +117,71 @@
     </section>
 
     <!-- Verification Modal -->
-    <div class="modal fade" id="verificationModal" tabindex="-1" aria-labelledby="verificationModalLabel" aria-hidden="true">
+    <div class="modal fade" id="verificationModal" tabindex="-1" aria-labelledby="verificationModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="verificationModalLabel">Email Verification</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <div class="text-center mb-4">
-                <i class="fas fa-envelope-open-text fa-3x text-primary mb-3"></i>
-                <h5>Verify your email address</h5>
-                <p>We've sent a 6-digit verification code to <span id="userEmail" class="fw-bold"></span></p>
-                <p class="small text-muted">Please check your inbox (not spam) and enter the code below</p>
-              </div>
-              
-              <div class="alert alert-danger d-none" id="verificationError" role="alert"></div>
-              <div class="alert alert-success d-none" id="verificationSuccess" role="alert"></div>
-              
-              <form id="verificationForm" onsubmit="verifyCode(event)">
-                <div class="verification-inputs d-flex justify-content-center mb-4">
-                  <input type="text" class="form-control code-input mx-1" maxlength="1" pattern="[0-9]" required>
-                  <input type="text" class="form-control code-input mx-1" maxlength="1" pattern="[0-9]" required>
-                  <input type="text" class="form-control code-input mx-1" maxlength="1" pattern="[0-9]" required>
-                  <input type="text" class="form-control code-input mx-1" maxlength="1" pattern="[0-9]" required>
-                  <input type="text" class="form-control code-input mx-1" maxlength="1" pattern="[0-9]" required>
-                  <input type="text" class="form-control code-input mx-1" maxlength="1" pattern="[0-9]" required>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="verificationModalLabel">Email Verification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="d-grid gap-2">
-                  <button type="submit" class="btn btn-primary">Verify</button>
-                  <button type="button" class="btn btn-outline-secondary" id="resendCode">
-                    Resend Code <span id="countdown" class="d-none">(30s)</span>
-                  </button>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-envelope-open-text fa-3x text-primary mb-3"></i>
+                        <h5>Verify your email address</h5>
+                        <p>We've sent a 6-digit verification code to <span id="userEmail" class="fw-bold"></span></p>
+                        <p class="small text-muted">Please check your inbox (not spam) and enter the code below</p>
+                    </div>
+
+                    <div class="alert alert-danger d-none" id="verificationError" role="alert"></div>
+                    <div class="alert alert-success d-none" id="verificationSuccess" role="alert"></div>
+
+                    <form id="verificationForm" onsubmit="verifyCode(event)">
+                        <div class="verification-inputs d-flex justify-content-center mb-4">
+                            <input type="text" class="form-control code-input mx-1" maxlength="1" pattern="[0-9]"
+                                required>
+                            <input type="text" class="form-control code-input mx-1" maxlength="1" pattern="[0-9]"
+                                required>
+                            <input type="text" class="form-control code-input mx-1" maxlength="1" pattern="[0-9]"
+                                required>
+                            <input type="text" class="form-control code-input mx-1" maxlength="1" pattern="[0-9]"
+                                required>
+                            <input type="text" class="form-control code-input mx-1" maxlength="1" pattern="[0-9]"
+                                required>
+                            <input type="text" class="form-control code-input mx-1" maxlength="1" pattern="[0-9]"
+                                required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Verify</button>
+                            <button type="button" class="btn btn-outline-secondary" id="resendCode">
+                                Resend Code <span id="countdown" class="d-none">(30s)</span>
+                            </button>
+                        </div>
+                    </form>
                 </div>
-              </form>
             </div>
-          </div>
         </div>
-      </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script th:inline="javascript">
         let verificationCode = '';
         let verificationEmail = '';
         let registrationFormData = null;
+
+        // Global variables for the timer
         let resendTimer = 30;
         let resendTimerInterval;
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Password toggle functionality for both password fields
             const togglePassword = document.getElementById('togglePassword');
             const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
-            
-            togglePassword.addEventListener('click', function() {
+
+            togglePassword.addEventListener('click', function () {
                 const password = document.getElementById('password');
                 const icon = this.querySelector('i');
-                
+
                 if (password.type === 'password') {
                     password.type = 'text';
                     icon.classList.remove('fa-eye');
@@ -184,10 +193,10 @@
                 }
             });
 
-            toggleConfirmPassword.addEventListener('click', function() {
+            toggleConfirmPassword.addEventListener('click', function () {
                 const confirmPassword = document.getElementById('confirmPassword');
                 const icon = this.querySelector('i');
-                
+
                 if (confirmPassword.type === 'password') {
                     confirmPassword.type = 'text';
                     icon.classList.remove('fa-eye');
@@ -198,21 +207,21 @@
                     icon.classList.add('fa-eye');
                 }
             });
-        
+
             // Form validation
             const registerForm = document.getElementById('registerForm');
             const inputs = registerForm.querySelectorAll('input');
-            
+
             inputs.forEach(input => {
                 input.addEventListener('input', () => {
                     validateInput(input);
                 });
             });
-        
+
             function validateInput(input) {
                 const errorDiv = input.closest('.mb-3').querySelector('.error-message');
-                
-                switch(input.id) {
+
+                switch (input.id) {
                     case 'username':
                         if (input.value.length < 3) {
                             showError(errorDiv, 'Username must be at least 3 characters');
@@ -223,7 +232,7 @@
                             input.classList.add('is-valid');
                         }
                         break;
-                    
+
                     case 'email':
                         const emailRegex = /^[A-Za-z0-9+_.-]+@(.+)$/;
                         if (!emailRegex.test(input.value)) {
@@ -235,7 +244,7 @@
                             input.classList.add('is-valid');
                         }
                         break;
-                    
+
                     case 'password':
                         if (input.value.length < 6) {
                             showError(errorDiv, 'Password must be at least 6 characters');
@@ -248,7 +257,7 @@
                         // Also validate confirm password when password changes
                         validateConfirmPassword();
                         break;
-                    
+
                     case 'confirmPassword':
                         validateConfirmPassword();
                         break;
@@ -259,13 +268,13 @@
                 const password = document.getElementById('password');
                 const confirmPassword = document.getElementById('confirmPassword');
                 const errorDiv = confirmPassword.closest('.mb-3').querySelector('.error-message');
-                
+
                 if (confirmPassword.value === '') {
                     hideError(errorDiv);
                     confirmPassword.classList.remove('is-invalid', 'is-valid');
                     return;
                 }
-                
+
                 if (password.value !== confirmPassword.value) {
                     showError(errorDiv, 'Passwords do not match');
                     confirmPassword.classList.add('is-invalid');
@@ -276,7 +285,7 @@
                     confirmPassword.classList.add('is-valid');
                 }
             }
-        
+
             function showError(element, message) {
                 element.textContent = message;
                 element.style.display = 'block';
@@ -284,37 +293,37 @@
                 element.style.fontSize = '0.875rem';
                 element.style.marginTop = '0.25rem';
             }
-        
+
             function hideError(element) {
                 element.textContent = '';
                 element.style.display = 'none';
             }
 
-            // Handle code input auto-tabbing
+            // Handle code input auto-tabbing and paste
             const codeInputs = document.querySelectorAll('.code-input');
-            
+
             codeInputs.forEach((input, index) => {
                 // Focus next input on keyup
-                input.addEventListener('keyup', function(e) {
+                input.addEventListener('keyup', function (e) {
                     if (e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
                         if (this.value.length === this.maxLength && index < codeInputs.length - 1) {
                             codeInputs[index + 1].focus();
                         }
                     }
                 });
-                
+
                 // Go back on backspace if empty
-                input.addEventListener('keydown', function(e) {
+                input.addEventListener('keydown', function (e) {
                     if ((e.key === 'Backspace' || e.key === 'Delete') && this.value.length === 0 && index > 0) {
                         codeInputs[index - 1].focus();
                     }
                 });
-                
+
                 // Handle paste event for the entire code
-                input.addEventListener('paste', function(e) {
+                input.addEventListener('paste', function (e) {
                     e.preventDefault();
                     const pastedData = e.clipboardData.getData('text').trim();
-                    
+
                     // Check if pasted data is numeric and correct length
                     if (/^\d+$/.test(pastedData) && pastedData.length === codeInputs.length) {
                         // Distribute pasted data across inputs
@@ -326,18 +335,18 @@
                     }
                 });
             });
-            
+
             // Handle resend code button
-            document.getElementById('resendCode').addEventListener('click', async function() {
+            document.getElementById('resendCode').addEventListener('click', async function () {
                 if (this.disabled) return;
-                
+
                 this.disabled = true;
                 this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...';
-                
+
                 try {
                     // Generate new code
                     verificationCode = generateRandomCode(6);
-                    
+
                     // Send new verification code
                     const response = await fetch('/user/send-code', {
                         method: 'POST',
@@ -349,75 +358,83 @@
                             code: verificationCode
                         })
                     });
-                    
+
                     if (!response.ok) {
                         const errorData = await response.text();
                         throw new Error(errorData || 'Failed to send verification email');
                     }
-                    
+
                     // Reset verification form
                     document.getElementById('verificationError').classList.add('d-none');
                     document.getElementById('verificationSuccess').classList.add('d-none');
                     document.getElementById('verificationForm').reset();
-                    
+
                     // Focus first input
                     document.querySelector('.code-input').focus();
-                    
-                    // Reset timer
+
+                    // Reset timer after successful send
                     resetResendTimer();
                 } catch (error) {
                     const verificationError = document.getElementById('verificationError');
                     verificationError.textContent = error.message || 'Failed to resend verification code. Please try again.';
                     verificationError.classList.remove('d-none');
-                    
+
                     this.disabled = false;
-                    this.textContent = 'Resend Code';
+                    this.textContent = 'Resend Code'; // Reset button text on error
                 }
             });
-            
+
             // Handle modal close - reset verification process
-            document.getElementById('verificationModal').addEventListener('hidden.bs.modal', function() {
+            document.getElementById('verificationModal').addEventListener('hidden.bs.modal', function () {
                 const verificationForm = document.getElementById('verificationForm');
                 const verificationError = document.getElementById('verificationError');
                 const verificationSuccess = document.getElementById('verificationSuccess');
-                
+
                 verificationForm.reset();
                 verificationError.classList.add('d-none');
                 verificationSuccess.classList.add('d-none');
-                
-                clearInterval(resendTimerInterval);
+
+                clearInterval(resendTimerInterval); // Clear timer when modal closes
+                // Reset resend button to initial state when modal closes
+                const resendButton = document.getElementById('resendCode');
+                resendButton.disabled = false;
+                resendButton.textContent = 'Resend Code';
+                const countdownSpan = resendButton.querySelector('#countdown');
+                if (countdownSpan) {
+                    countdownSpan.classList.add('d-none');
+                }
             });
-        });
+        }); // End DOMContentLoaded
 
         // Form submission handler
         async function handleRegister(event) {
             event.preventDefault();
-            
+
             const errorAlert = document.getElementById('errorAlert');
             const successAlert = document.getElementById('successAlert');
             const submitButton = event.target.querySelector('button[type="submit"]');
             const form = event.target;
-            
+
             // Basic validation
             const username = form.username.value;
             const email = form.email.value;
             const password = form.password.value;
             const confirmPassword = form.confirmPassword.value;
             const role = form.role.value;
-            
+
             if (username.length < 3) {
                 errorAlert.textContent = 'Username must be at least 3 characters';
                 errorAlert.classList.remove('d-none');
                 return;
             }
-            
+
             const emailRegex = /^[A-Za-z0-9+_.-]+@(.+)$/;
             if (!emailRegex.test(email)) {
                 errorAlert.textContent = 'Please enter a valid email address';
                 errorAlert.classList.remove('d-none');
                 return;
             }
-            
+
             if (password.length < 6) {
                 errorAlert.textContent = 'Password must be at least 6 characters';
                 errorAlert.classList.remove('d-none');
@@ -429,10 +446,10 @@
                 errorAlert.classList.remove('d-none');
                 return;
             }
-            
+
             submitButton.disabled = true;
             submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
-            
+
             // Store form data for later use
             registrationFormData = {
                 username: username,
@@ -440,12 +457,12 @@
                 password: password,
                 role: role
             };
-            
+
             try {
                 // Generate random 6-digit code
                 verificationCode = generateRandomCode(6);
                 verificationEmail = email;
-                
+
                 // Send verification code to user's email
                 const response = await fetch('/user/send-code', {
                     method: 'POST',
@@ -457,40 +474,40 @@
                         code: verificationCode
                     })
                 });
-                
+
                 if (!response.ok) {
                     const errorData = await response.text();
                     throw new Error(errorData || 'Failed to send verification email');
                 }
-                
+
                 // Show the user's email in the modal
                 document.getElementById('userEmail').textContent = email;
-                
+
                 // Reset alerts
                 errorAlert.classList.add('d-none');
                 successAlert.classList.add('d-none');
-                
+
                 // Reset verification form if it was previously used
                 document.getElementById('verificationError').classList.add('d-none');
                 document.getElementById('verificationSuccess').classList.add('d-none');
                 document.getElementById('verificationForm').reset();
-                
-                // Reset the resend timer
+
+                // Reset the resend timer after initial send
                 resetResendTimer();
-                
+
                 // Show verification modal
                 const verificationModal = new bootstrap.Modal(document.getElementById('verificationModal'));
                 verificationModal.show();
-                
+
                 // Focus the first input field
                 setTimeout(() => {
                     document.querySelector('.code-input').focus();
                 }, 500);
-                
-                // Reset the register button
+
+                // Reset the register button state
                 submitButton.disabled = false;
                 submitButton.textContent = 'Register';
-                
+
             } catch (error) {
                 errorAlert.textContent = error.message || 'An error occurred. Please try again.';
                 errorAlert.classList.remove('d-none');
@@ -498,32 +515,32 @@
                 submitButton.textContent = 'Register';
             }
         }
-        
+
         // Function to verify the entered code
         async function verifyCode(event) {
             event.preventDefault();
-            
+
             const verificationError = document.getElementById('verificationError');
             const verificationSuccess = document.getElementById('verificationSuccess');
             const submitButton = event.target.querySelector('button[type="submit"]');
-            
+
             // Get entered code
             const codeInputs = document.querySelectorAll('.code-input');
             let enteredCode = '';
             codeInputs.forEach(input => {
                 enteredCode += input.value;
             });
-            
+
             submitButton.disabled = true;
             submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Verifying...';
-            
+
             // Verify if code matches
             if (enteredCode === verificationCode) {
                 // Successful verification
                 verificationError.classList.add('d-none');
                 verificationSuccess.textContent = 'Email verified successfully! Creating your account...';
                 verificationSuccess.classList.remove('d-none');
-                
+
                 try {
                     // Complete registration with the stored form data
                     const response = await fetch('/user/registers', {
@@ -533,9 +550,9 @@
                         },
                         body: JSON.stringify(registrationFormData)
                     });
-                    
+
                     const data = await response.text();
-                    
+
                     if (response.ok) {
                         // Registration successful
                         setTimeout(() => {
@@ -550,7 +567,7 @@
                     }
                 } catch (error) {
                     verificationSuccess.classList.add('d-none');
-                    verificationError.textContent = 'An error occurred. Please try again.';
+                    verificationError.textContent = 'An error occurred during registration. Please try again.';
                     verificationError.classList.remove('d-none');
                     submitButton.disabled = false;
                     submitButton.textContent = 'Verify';
@@ -564,7 +581,7 @@
                 submitButton.textContent = 'Verify';
             }
         }
-        
+
         // Generate random numeric code of specified length
         function generateRandomCode(length) {
             let code = '';
@@ -573,52 +590,70 @@
             }
             return code;
         }
-        
-        // Reset resend timer
+
+        /**
+         * Resets and starts the countdown timer for the resend code button.
+         */
         function resetResendTimer() {
             const resendButton = document.getElementById('resendCode');
-            const countdown = document.getElementById('countdown');
-            
-            resendButton.disabled = true;
-            resendTimer = 30;
-            
-            countdown.textContent = `(${resendTimer}s)`;
-            countdown.classList.remove('d-none');
-            
+            let countdownSpan = resendButton.querySelector('#countdown'); // Check if it exists
+
+            // Clear any existing timer to prevent multiple timers running
             clearInterval(resendTimerInterval);
-            
+
+            // Reset timer value
+            resendTimer = 30;
+
+            // Update button text to show countdown and disable it
+            resendButton.disabled = true;
+            resendButton.innerHTML = `Resend Code <span id="countdown">(${resendTimer}s)</span>`;
+
+            // Get reference to the newly created span
+            countdownSpan = resendButton.querySelector('#countdown');
+            if (countdownSpan) {
+                countdownSpan.classList.remove('d-none'); // Ensure it's visible
+            }
+
+
+            // Start the new interval
             resendTimerInterval = setInterval(() => {
                 resendTimer--;
-                countdown.textContent = `(${resendTimer}s)`;
-                
-                if (resendTimer <= 0) {
-                    clearInterval(resendTimerInterval);
-                    resendButton.disabled = false;
-                    countdown.classList.add('d-none');
+                if (countdownSpan) {
+                    countdownSpan.textContent = `(${resendTimer}s)`;
                 }
-            }, 1000);
+
+                if (resendTimer <= 0) {
+                    clearInterval(resendTimerInterval); // Stop the timer
+                    resendButton.disabled = false; // Re-enable the button
+                    resendButton.textContent = 'Resend Code'; // Reset button text without countdown
+                    if (countdownSpan) {
+                        countdownSpan.classList.add('d-none'); // Hide countdown text
+                    }
+                }
+            }, 1000); // Update every 1 second
         }
+
 
         // Loading screen logic
         document.addEventListener('DOMContentLoaded', () => {
             const loadingOverlay = document.getElementById('loadingOverlay');
-            const content = document.querySelector('.content');
+            const content = document.querySelector('.content'); // Assuming you have a .content class on your main content area
 
             // Show loading screen immediately
             loadingOverlay.style.display = 'flex';
-            
+
             // Wait for everything to load
             window.addEventListener('load', () => {
                 // Small delay to ensure smooth transition
                 setTimeout(() => {
                     // Hide loading screen
                     loadingOverlay.classList.add('hidden');
-                    
+
                     // Show content
                     if (content) {
                         content.classList.add('visible');
                     }
-                    
+
                     // Clean up loading overlay after animation
                     setTimeout(() => {
                         loadingOverlay.style.display = 'none';
@@ -628,4 +663,5 @@
         });
     </script>
 </body>
+
 </html>
